@@ -39,7 +39,7 @@ namespace NadeoLiveServicesAPI
 	    Json::Value members = clubInfo["clubMemberList"];
 
 	    array<string> clubMembers = {};
-	    for(uint n = 0; n < members.Length; n++)
+	    for(uint n = 0; n < members.Length && n < 100; n++)
 	    {
 	        string accountId = members[n]["accountId"];
 	        clubMembers.InsertLast(accountId);
@@ -70,10 +70,24 @@ namespace NadeoLiveServicesAPI
 	    return clubs;
 	}*/
 
+	Result@ GetDiv1CutoffTime(const int &in challengeid, const string &in mapid)
+	{
+		string compUrl = NadeoServices::BaseURLCompetition();
+		string cotdEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "?offset=63&length=1";
+		Json::Value divOneCutoff = FetchEndpoint(cotdEndpoint);
+		if (divOneCutoff.Length > 0)
+		{
+			uint playerTime = divOneCutoff[0]["score"];
+	    	string playerId = divOneCutoff[0]["player"];
+	    	int playerRank = divOneCutoff[0]["rank"];
+			return Result(playerId, playerRank, 1, playerTime);
+		}
+		return null;
+	}
+
 	array<Result@> GetCurrentStandingForPlayers(const array<string> &in players, const int &in challengeid, const string &in mapid)
 	{
 	    string compUrl = NadeoServices::BaseURLCompetition();
-	    string playersString = string::Join(players, ",");
 	    string playersEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "/players?players[]=";
 
 	    for(uint n = 0; n < players.Length; n++ )

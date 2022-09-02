@@ -17,6 +17,10 @@ class SingleUserResultVM
     }
 
     string TimeString() {
+        if (this.rank == 64)
+        {
+            return "\\$f80" + Time::Format(this.time) + "\\$z";
+        }
         return "\\$0ff" + Time::Format(this.time) + "\\$z";
     }
 
@@ -25,7 +29,16 @@ class SingleUserResultVM
     }
 
     string RankString() {
+        if (this.rank == 64)
+        {
+            return "\\$f80" + Text::Format("%d", this.rank);
+        }
         return "\\$3F0" + Text::Format("%d", this.rank);
+    }
+
+    int opCmp(SingleUserResultVM@ other) {
+        int diff = this.time - other.time;
+        return (diff == 0) ? 0 : ((diff > 0) ? 1 : -1);
     }
 
 }

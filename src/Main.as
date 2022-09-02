@@ -3,15 +3,19 @@ int totalPlayers = 0;
 
 UserResultVM vm = UserResultVM();
 
-void Render() {
+void Render() 
+{
 #if TMNEXT
-    auto app = cast<CTrackMania>(GetApp());
-    auto network = cast<CTrackManiaNetwork>(app.Network);
-    auto server_info = cast<CTrackManiaNetworkServerInfo>(network.ServerInfo);
 
-    if (Permissions::PlayOnlineCompetition() && windowVisible && app.CurrentPlayground !is null && server_info.CurGameModeStr == "TM_TimeAttackDaily_Online") 
+    if (hasPermissionAndIsCOTDRunning())
     {
-        if(!UI::IsOverlayShown() && onlyOnOverlay) {
+        if (!UI::IsGameUIVisible() && settings_hideIfUIHidden)
+        {
+            return;
+        }
+
+        if(!UI::IsOverlayShown() && onlyOnOverlay) 
+        {
             return;
         }
 
@@ -20,7 +24,8 @@ void Render() {
 #endif
 }
 
-void RenderMenu() {
+void RenderMenu() 
+{
 #if TMNEXT
     if(UI::MenuItem("\\$f0c\\$s" + Icons::Bold + "\\$z COTD Live Qualifying", "", windowVisible)) {
         windowVisible = !windowVisible;
@@ -33,7 +38,6 @@ void Main()
 #if TMNEXT
     auto app = cast<CTrackMania>(GetApp());
     auto network = cast<CTrackManiaNetwork>(app.Network);
-    auto server_info = cast<CTrackManiaNetworkServerInfo>(network.ServerInfo);
 
     NadeoServices::AddAudience("NadeoClubServices");
 
@@ -50,8 +54,7 @@ void Main()
 
     while(true) 
     {
-        //Only active with Club edition and during COTD Time Attack
-        if (Permissions::PlayOnlineCompetition() && network.ClientManiaAppPlayground !is null && network.ClientManiaAppPlayground.Playground !is null && network.ClientManiaAppPlayground.Playground.Map !is null && server_info.CurGameModeStr == "TM_TimeAttackDaily_Online") 
+        if (hasPermissionAndIsCOTDRunning())
         {
             string mapid = network.ClientManiaAppPlayground.Playground.Map.MapInfo.MapUid;
 
@@ -86,24 +89,40 @@ void Main()
                 {
                     currentAccountIds = NadeoCoreAPI::GetFriendList();
                     currentClubName = "Friends";
-                    //Warn wenn mehr als 100
                 }
                 currentDisplayMode = Friends;
             }
                 
+
             array<Result@> playerResults = NadeoLiveServicesAPI::GetCurrentStandingForPlayers(currentAccountIds, currentChallengeid, mapid);
 
             for(uint n = 0; n < playerResults.Length; n++ )
             {
                 allResults.InsertLast(playerResults[n]);
             }
+            
             allResults.SortAsc();
 
             for(uint n = 0; n < numberOfPlayerDisplay && n < allResults.Length; n++ )
             {
                 topResults.InsertLast(allResults[n]);
             }
-            vm = VMMapper::ToUserResultVM(currentClubName, topResults);
+
+            array<SingleUserResultVM@> singleResultVMs = VMMapper::ToSingleUserResultVMs(topResults);
+
+            //Show Div 1 Cutoff
+            if (settings_showDivOneCutoff)
+            {
+                Result@ cutoff = NadeoLiveServicesAPI::GetDiv1CutoffTime(currentChallengeid, mapid);
+                if (@cutoff != null)
+                {
+                    SingleUserResultVM@ cutoffVM = VMMapper::ToSingleUserResultCutoffVM(cutoff);
+                    singleResultVMs.InsertLast(cutoffVM);
+                    singleResultVMs.SortAsc();
+                }
+            }
+
+            vm = VMMapper::ToUserResultVM(currentClubName, singleResultVMs);
 
         } else {
             //Reset state once COTD quali ends
@@ -114,4 +133,13 @@ void Main()
         sleep(15000);
     }
 #endif
+}
+
+ //Only active with Club edition and during COTD Time Attack
+bool hasPermissionAndIsCOTDRunning()
+{
+    auto app = cast<CTrackMania>(GetApp());
+    auto network = cast<CTrackManiaNetwork>(app.Network);
+    auto server_info = cast<CTrackManiaNetworkServerInfo>(network.ServerInfo);
+    return Permissions::PlayOnlineCompetition() && network.ClientManiaAppPlayground !is null && network.ClientManiaAppPlayground.Playground !is null && network.ClientManiaAppPlayground.Playground.Map !is null && server_info.CurGameModeStr == "TM_TimeAttackDaily_Online";
 }
