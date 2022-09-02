@@ -11,6 +11,10 @@ void Render() {
 
     if (Permissions::PlayOnlineCompetition() && windowVisible && app.CurrentPlayground !is null && server_info.CurGameModeStr == "TM_TimeAttackDaily_Online") 
     {
+        if(!UI::IsOverlayShown() && onlyOnOverlay) {
+            return;
+        }
+
         COTDClubLiveUI::renderUI(vm);
     }
 #endif

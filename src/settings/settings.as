@@ -12,6 +12,9 @@ void RenderSettingsAbout() {
 [Setting category="Display Settings" name="Window visible" description="To move the table, click and drag while the Openplanet overlay is visible"]
 bool windowVisible = true;
 
+[Setting category="Display Settings" name="Only show when Openplanet visible" description="Hides the table when the Openplanet overlay is not visible"]
+bool onlyOnOverlay = false;
+
 [Setting category="Display Settings" name="Display Mode" description="Show club members or online Uplay friends"]
 DisplayMode settings_displayMode = Club;
 
