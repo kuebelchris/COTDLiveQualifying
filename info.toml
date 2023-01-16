@@ -7,5 +7,5 @@ siteid = 238
 
 [script]
 dependencies = [ "NadeoServices" ]
-imports = [ "Permissions.as", "Time.as", "Formatting.as" ]
+imports = []
 
