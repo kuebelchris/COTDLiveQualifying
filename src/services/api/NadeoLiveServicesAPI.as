@@ -3,7 +3,7 @@ namespace NadeoLiveServicesAPI
 	int GetCurrentCOTDChallengeId()
 	{
 	    string compUrl = NadeoServices::BaseURLCompetition();
-	    auto matchstatus = FetchEndpoint(compUrl + "/api/daily-cup/current");
+	    auto matchstatus = FetchEndpoint(compUrl + "/api/cup-of-the-day/current");
 	    string challengeName = matchstatus["challenge"]["name"];
 	    return matchstatus["challenge"]["id"];
 	}
