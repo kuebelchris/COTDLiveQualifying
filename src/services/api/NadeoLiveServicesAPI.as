@@ -103,7 +103,7 @@ namespace NadeoLiveServicesAPI
             for(uint n = 0; n < records.Length; n++ )
             {
             	Json::Value playerResult = records[n];
-            	if (playerResult.get_Length() > 0)
+            	if (playerResult.Length > 0)
             	{
             		uint playerTime = playerResult["score"];
 	    			string playerId = playerResult["player"];

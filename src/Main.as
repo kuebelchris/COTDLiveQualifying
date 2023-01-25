@@ -36,10 +36,12 @@ void RenderMenu()
 void Main() 
 {
 #if TMNEXT
+
     auto app = cast<CTrackMania>(GetApp());
     auto network = cast<CTrackManiaNetwork>(app.Network);
 
     NadeoServices::AddAudience("NadeoClubServices");
+    NadeoServices::AddAudience("NadeoLiveServices");
 
     int currentChallengeid = 0;
     int currentClubId = 0;
@@ -47,7 +49,7 @@ void Main()
     DisplayMode currentDisplayMode = Club; //0 == Club, 1 == Friends
     array<string> currentAccountIds;
 
-    while (!NadeoServices::IsAuthenticated("NadeoClubServices")) 
+    while (!NadeoServices::IsAuthenticated("NadeoClubServices") && !NadeoServices::IsAuthenticated("NadeoLiveServices")) 
     {
         yield();
     }
