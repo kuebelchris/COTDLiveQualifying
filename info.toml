@@ -2,10 +2,10 @@
 name = "COTD Live Qualifying"
 author = "KuebelChris"
 category = "Race"
-version = "1.0"
+version = "1.2"
 siteid = 238
 
 [script]
 dependencies = [ "NadeoServices" ]
-imports = [ "Permissions.as", "Time.as", "Formatting.as" ]
+imports = []
 
