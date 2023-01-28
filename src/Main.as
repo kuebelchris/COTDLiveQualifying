@@ -48,6 +48,7 @@ void Main()
     string currentClubName = "";
     DisplayMode currentDisplayMode = Club; //0 == Club, 1 == Friends
     array<string> currentAccountIds;
+    int friendsRefreshIndicator = 0;
 
     while (!NadeoServices::IsAuthenticated("NadeoClubServices") && !NadeoServices::IsAuthenticated("NadeoLiveServices")) 
     {
@@ -58,6 +59,8 @@ void Main()
     {
         if (hasPermissionAndIsCOTDRunning())
         {
+
+            friendsRefreshIndicator++;
             string mapid = network.ClientManiaAppPlayground.Playground.Map.MapInfo.MapUid;
 
             if (currentChallengeid == 0) 
@@ -86,10 +89,12 @@ void Main()
             }
             else if(settings_displayMode == 1)
             {
-                //Refresh if displaymode was changed from club to friends
-                if (currentAccountIds.Length == 0 || currentDisplayMode != settings_displayMode)
+                //Refresh if displaymode was changed from club to friends, refresh every minute
+                if (currentAccountIds.Length == 0 || currentDisplayMode != settings_displayMode || friendsRefreshIndicator >= 4)
                 {
                     currentAccountIds = NadeoCoreAPI::GetFriendList();
+                    friendsRefreshIndicator = 0;
+                    currentAccountIds.InsertLast(NadeoCoreAPI::getCurrentWebServicesUserId());
                     currentClubName = "Friends";
                 }
                 currentDisplayMode = Friends;

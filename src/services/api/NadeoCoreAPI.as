@@ -75,5 +75,10 @@ namespace NadeoCoreAPI {
 		}
 	}
 
+	string getCurrentWebServicesUserId() {
+		auto app = cast<CTrackMania>(GetApp());
+		return cast<CTrackManiaPlayerInfo>(cast<CTrackManiaNetwork>(app.Network).PlayerInfo).WebServicesUserId;
+	}
+
 }
 
