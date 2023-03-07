@@ -60,6 +60,7 @@ void Main()
         if (hasPermissionAndIsCOTDRunning())
         {
 
+            string currentUserId = NadeoCoreAPI::getCurrentWebServicesUserId();
             friendsRefreshIndicator++;
             string mapid = network.ClientManiaAppPlayground.Playground.Map.MapInfo.MapUid;
 
@@ -79,11 +80,14 @@ void Main()
                 if (currentAccountIds.Length == 0 || currentDisplayMode != settings_displayMode || currentClubId != settings_clubId)
                 {
                     currentClubId = settings_clubId;
-                    currentClubName = "Club: " + ColoredString(NadeoLiveServicesAPI::GetClubName(currentClubId));
-                    //Show warning if more than 100 members
-                    int offset = 0;
-                    int length = 100;
-                    currentAccountIds = NadeoLiveServicesAPI::GetMemberIdsFromClub(currentClubId, offset, length);
+                    if (currentClubId != 0)
+                    {
+                        currentClubName = "Club: " + ColoredString(NadeoLiveServicesAPI::GetClubName(currentClubId));
+                        //Show warning if more than 100 members
+                        int offset = 0;
+                        int length = 100;
+                        currentAccountIds = NadeoLiveServicesAPI::GetMemberIdsFromClub(currentClubId, offset, length);
+                    }
                 }
                 currentDisplayMode = Club;
             }
@@ -94,12 +98,16 @@ void Main()
                 {
                     currentAccountIds = NadeoCoreAPI::GetFriendList();
                     friendsRefreshIndicator = 0;
-                    currentAccountIds.InsertLast(NadeoCoreAPI::getCurrentWebServicesUserId());
                     currentClubName = "Friends";
                 }
                 currentDisplayMode = Friends;
             }
-                
+             
+            //Add current user if not already included    
+            if (currentAccountIds.Find(currentUserId) <= 0)
+            {
+                currentAccountIds.InsertLast(currentUserId);
+            }
 
             array<Result@> playerResults = NadeoLiveServicesAPI::GetCurrentStandingForPlayers(currentAccountIds, currentChallengeid, mapid);
 
