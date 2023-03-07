@@ -13,6 +13,10 @@ namespace NadeoLiveServicesAPI
 	{
 		string nadeoURL = NadeoServices::BaseURL();
 
+		if (clubId == 0)
+		{
+			return "Please select a Club in the settings";
+		}
 	    Json::Value clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId));
 	    //Check if result was found
 	    if (clubInfo.Length > 1)
@@ -30,6 +34,11 @@ namespace NadeoLiveServicesAPI
 	{
 	    string nadeoURL = NadeoServices::BaseURL();
 
+		array<string> clubMembers = {};
+	    if (clubId == 0)
+	    {
+	    	return clubMembers;
+	    }
 	    Json::Value clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId) + "/member?offset=" + Text::Format("%d", offset) + "&length=" + Text::Format("%d", length));
 	    //Check if result was found
 	    if (clubInfo.Length <= 1)
@@ -37,8 +46,7 @@ namespace NadeoLiveServicesAPI
 	    	return {};
 	    }
 	    Json::Value members = clubInfo["clubMemberList"];
-
-	    array<string> clubMembers = {};
+	    
 	    for(uint n = 0; n < members.Length && n < 100; n++)
 	    {
 	        string accountId = members[n]["accountId"];

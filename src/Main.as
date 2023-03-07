@@ -80,7 +80,12 @@ void Main()
                 if (currentAccountIds.Length == 0 || currentDisplayMode != settings_displayMode || currentClubId != settings_clubId)
                 {
                     currentClubId = settings_clubId;
-                    if (currentClubId != 0)
+                    if (currentClubId == 0)
+                    {
+                        currentClubName = "Please select a Club in the settings";
+                        currentAccountIds = {};
+                    }
+                    else
                     {
                         currentClubName = "Club: " + ColoredString(NadeoLiveServicesAPI::GetClubName(currentClubId));
                         //Show warning if more than 100 members
@@ -103,8 +108,8 @@ void Main()
                 currentDisplayMode = Friends;
             }
              
-            //Add current user if not already included    
-            if (currentAccountIds.Find(currentUserId) <= 0)
+            //Add current user if not already included  
+            if (currentAccountIds.Find(currentUserId) < 0)
             {
                 currentAccountIds.InsertLast(currentUserId);
             }
