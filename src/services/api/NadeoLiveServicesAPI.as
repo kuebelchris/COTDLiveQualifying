@@ -2,8 +2,7 @@ namespace NadeoLiveServicesAPI
 {
 	int GetCurrentCOTDChallengeId()
 	{
-	    string compUrl = NadeoServices::BaseURLCompetition();
-	    auto matchstatus = FetchEndpoint(compUrl + "/api/cup-of-the-day/current");
+		auto matchstatus = MapMonitor::GetCotdCurrent();
 	    string challengeName = matchstatus["challenge"]["name"];
 	    return matchstatus["challenge"]["id"];
 	}
@@ -17,7 +16,7 @@ namespace NadeoLiveServicesAPI
 		{
 			return "Please select a Club in the settings";
 		}
-	    Json::Value clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId));
+	    Json::Value@ clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId));
 	    //Check if result was found
 	    if (clubInfo.Length > 1)
 	    {
@@ -27,7 +26,7 @@ namespace NadeoLiveServicesAPI
 	    {
 	    	return "Could not load club";
 	    }
-	    
+
 	}
 
 	array<string> GetMemberIdsFromClub(const int &in clubId, const int &in offset, const int &in length)
@@ -39,14 +38,14 @@ namespace NadeoLiveServicesAPI
 	    {
 	    	return clubMembers;
 	    }
-	    Json::Value clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId) + "/member?offset=" + Text::Format("%d", offset) + "&length=" + Text::Format("%d", length));
+	    Json::Value@ clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId) + "/member?offset=" + Text::Format("%d", offset) + "&length=" + Text::Format("%d", length));
 	    //Check if result was found
 	    if (clubInfo.Length <= 1)
 	    {
 	    	return {};
 	    }
-	    Json::Value members = clubInfo["clubMemberList"];
-	    
+	    Json::Value@ members = clubInfo["clubMemberList"];
+
 	    for(uint n = 0; n < members.Length && n < 100; n++)
 	    {
 	        string accountId = members[n]["accountId"];
@@ -74,15 +73,13 @@ namespace NadeoLiveServicesAPI
 
 			clubs.InsertLast(ClubSelectItem(name, clubId, memberCount));
 		}
-		
+
 	    return clubs;
 	}*/
 
 	Result@ GetDiv1CutoffTime(const int &in challengeid, const string &in mapid)
 	{
-		string compUrl = NadeoServices::BaseURLCompetition();
-		string cotdEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "?offset=63&length=1";
-		Json::Value divOneCutoff = FetchEndpoint(cotdEndpoint);
+		auto divOneCutoff = MapMonitor::GetChallengeRecords(challengeid, mapid, 1, 63);
 		if (divOneCutoff.Length > 0)
 		{
 			uint playerTime = divOneCutoff[0]["score"];
@@ -95,33 +92,25 @@ namespace NadeoLiveServicesAPI
 
 	array<Result@> GetCurrentStandingForPlayers(const array<string> &in players, const int &in challengeid, const string &in mapid)
 	{
-	    string compUrl = NadeoServices::BaseURLCompetition();
-	    string playersEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "/players?players[]=";
-
-	    for(uint n = 0; n < players.Length; n++ )
-	    {
-	        playersEndpoint += "&players[]=" + players[n];
-	    }
-
-	    Json::Value currentStanding = FetchEndpoint(playersEndpoint);
+		auto currentStanding = MapMonitor::GetPlayersRank(challengeid, mapid, players);
 	    totalPlayers = currentStanding["cardinal"];
-	    Json::Value records = currentStanding["records"];
+	    Json::Value@ records = currentStanding["records"];
 
 	    array<Result@> results = {};
             for(uint n = 0; n < records.Length; n++ )
             {
-            	Json::Value playerResult = records[n];
+            	Json::Value@ playerResult = records[n];
             	if (playerResult.Length > 0)
             	{
             		uint playerTime = playerResult["score"];
 	    			string playerId = playerResult["player"];
 	    			int playerRank = playerResult["rank"];
 	    			int currentDiv = calculateDiv(playerRank);
-				    
+
             		Result@ playerDivTime = Result(playerId, playerRank, currentDiv, playerTime);
                 	results.InsertLast(playerDivTime);
             	}
-                
+
             }
         return results;
 	}
@@ -132,13 +121,13 @@ namespace NadeoLiveServicesAPI
 		{
 			return 1;
 	    }
-	    else 
+	    else
 		{
 			return ((playerRank - 1) / 64) + 1;
 		}
 	}
 
-	Json::Value FetchEndpoint(const string &in route) {
+	Json::Value@ FetchEndpoint(const string &in route) {
 	    auto req = NadeoServices::Get("NadeoClubServices", route);
 	    req.Start();
 	    while(!req.Finished()) {
@@ -147,7 +136,7 @@ namespace NadeoLiveServicesAPI
 	    return Json::Parse(req.String());
 	}
 
-	Json::Value FetchEndpointLiveServices(const string &in route) {
+	Json::Value@ FetchEndpointLiveServices(const string &in route) {
 	    auto req = NadeoServices::Get("NadeoLiveServices", route);
 	    req.Start();
 	    while(!req.Finished()) {
