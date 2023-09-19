@@ -10,7 +10,7 @@ namespace NadeoLiveServicesAPI
 
 	string GetClubName(const int &in clubId)
 	{
-		string nadeoURL = NadeoServices::BaseURL();
+		string nadeoURL = NadeoServices::BaseURLLive();
 
 		if (clubId == 0)
 		{
@@ -31,7 +31,7 @@ namespace NadeoLiveServicesAPI
 
 	array<string> GetAllMemberIdsFromClub(const int &in clubId)
 	{
-	    string nadeoURL = NadeoServices::BaseURL();
+		string nadeoURL = NadeoServices::BaseURLLive();
 		int offset = 0;
 		int length = 100;
 
@@ -44,7 +44,7 @@ namespace NadeoLiveServicesAPI
 		int maxPage = 1;
 		int currPage = 0;
 		int itemCount = -1;
-		while (currPage < maxPage) {
+		while (currPage < Math::Min(10, maxPage)) {
 			Json::Value@ clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + clubId + "/member?offset=" + offset + "&length=" + length);
 			if (clubInfo.Length <= 1) {
 				break;
@@ -55,10 +55,15 @@ namespace NadeoLiveServicesAPI
 			offset += length;
 			currPage += 1;
 
-			for(uint n = 0; n < members.Length && n < 100; n++) {
+			for(uint n = 0; n < members.Length; n++) {
 				string accountId = members[n]["accountId"];
 				clubMembers.InsertLast(accountId);
 			}
+		}
+		if (maxPage > 10) {
+			auto msg = "Your chosen club has more than 1000 members, but only the first 1000 members are loaded and checked.";
+			UI::ShowNotification(Meta::ExecutingPlugin().Name, msg, vec4(1, .5, 0, 1), 12500);
+			warn(msg);
 		}
 
 	    return clubMembers;
@@ -67,7 +72,7 @@ namespace NadeoLiveServicesAPI
 	//TODO for later: feature to select a club via UI Dropdown.
 	/*array<ClubSelectItem@> GetAllCLubs()
 	{
-		string nadeoURL = NadeoServices::BaseURL();
+		string nadeoURL = NadeoServices::BaseURLLive();
 
 		Json::Value clubResult = FetchEndpointLiveServices(nadeoURL + "/api/token/club/mine?offset=0&length=100");
 		Json::Value clubList = clubResult["clubList"];

@@ -8,4 +8,4 @@ siteid = 238
 [script]
 dependencies = [ "NadeoServices" ]
 imports = []
-
+# defines = ["DEV"]

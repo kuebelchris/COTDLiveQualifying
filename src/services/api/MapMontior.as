@@ -38,18 +38,25 @@ namespace MapMonitor {
     }
 
     Json::Value@ GetPlayersRank(int challengeid, const string &in mapid, const string[]&in userIds) {
-        string players = string::Join(userIds, ",");
-        return CallMapMonitorApiPath("/cached/api/challenges/" + challengeid + "/records/maps/" + mapid + "/players?players[]=" + players);
+        auto data = Json::Object();
+        data['players'] = Json::Array();
+        for (uint i = 0; i < userIds.Length; i++) {
+            data['players'].Add(userIds[i]);
+        }
+        return CallMapMonitorApiPath("/cached/api/challenges/" + challengeid + "/records/maps/" + mapid + "/players", Net::HttpMethod::Post, data);
     }
 
-    Json::Value@ CallMapMonitorApiPath(const string &in path) {
+    Json::Value@ CallMapMonitorApiPath(const string &in path, Net::HttpMethod method = Net::HttpMethod::Get, Json::Value@ postData = null) {
         auto url = MM_API_ROOT + path;
         // trace("[CallMapMonitorApiPath] Requesting: " + url);
         Net::HttpRequest@ req = Net::HttpRequest();
         req.Url = url;
         auto plugin = Meta::ExecutingPlugin();
         req.Headers['User-Agent'] = plugin.Name + '/' + plugin.Version + '/Openplanet-Plugin/contact=@' + plugin.Author;
-        req.Method = Net::HttpMethod::Get;
+        req.Method = method;
+        if (method == Net::HttpMethod::Post && postData !is null) {
+            req.Body = Json::Write(postData);
+        }
         req.Start();
         while(!req.Finished()) { yield(); }
         auto respStr = req.String();
