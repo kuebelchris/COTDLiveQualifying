@@ -16,7 +16,7 @@ namespace NadeoLiveServicesAPI
 		{
 			return "Please select a Club in the settings";
 		}
-	    Json::Value@ clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId));
+	    Json::Value@ clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + clubId);
 	    //Check if result was found
 	    if (clubInfo.Length > 1)
 	    {
@@ -29,28 +29,38 @@ namespace NadeoLiveServicesAPI
 
 	}
 
-	array<string> GetMemberIdsFromClub(const int &in clubId, const int &in offset, const int &in length)
+	array<string> GetAllMemberIdsFromClub(const int &in clubId)
 	{
 	    string nadeoURL = NadeoServices::BaseURL();
+		int offset = 0;
+		int length = 100;
 
 		array<string> clubMembers = {};
 	    if (clubId == 0)
 	    {
 	    	return clubMembers;
 	    }
-	    Json::Value@ clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId) + "/member?offset=" + Text::Format("%d", offset) + "&length=" + Text::Format("%d", length));
-	    //Check if result was found
-	    if (clubInfo.Length <= 1)
-	    {
-	    	return {};
-	    }
-	    Json::Value@ members = clubInfo["clubMemberList"];
 
-	    for(uint n = 0; n < members.Length && n < 100; n++)
-	    {
-	        string accountId = members[n]["accountId"];
-	        clubMembers.InsertLast(accountId);
-	    }
+		int maxPage = 1;
+		int currPage = 0;
+		int itemCount = -1;
+		while (currPage < maxPage) {
+			Json::Value@ clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + clubId + "/member?offset=" + offset + "&length=" + length);
+			if (clubInfo.Length <= 1) {
+				break;
+			}
+			Json::Value@ members = clubInfo["clubMemberList"];
+			maxPage = clubInfo['maxPage'];
+			itemCount = clubInfo['itemCount'];
+			offset += length;
+			currPage += 1;
+
+			for(uint n = 0; n < members.Length && n < 100; n++) {
+				string accountId = members[n]["accountId"];
+				clubMembers.InsertLast(accountId);
+			}
+		}
+
 	    return clubMembers;
 	}
 

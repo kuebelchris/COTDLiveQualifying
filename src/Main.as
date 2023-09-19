@@ -1,9 +1,9 @@
-// Global variables  
+// Global variables
 int totalPlayers = 0;
 
 UserResultVM vm = UserResultVM();
 
-void Render() 
+void Render()
 {
 #if TMNEXT
 
@@ -14,7 +14,7 @@ void Render()
             return;
         }
 
-        if(!UI::IsOverlayShown() && onlyOnOverlay) 
+        if(!UI::IsOverlayShown() && onlyOnOverlay)
         {
             return;
         }
@@ -24,7 +24,7 @@ void Render()
 #endif
 }
 
-void RenderMenu() 
+void RenderMenu()
 {
 #if TMNEXT
     if(UI::MenuItem("\\$f0c\\$s" + Icons::Bold + "\\$z COTD Live Qualifying", "", windowVisible)) {
@@ -33,7 +33,7 @@ void RenderMenu()
 #endif
 }
 
-void Main() 
+void Main()
 {
 #if TMNEXT
 
@@ -50,12 +50,12 @@ void Main()
     array<string> currentAccountIds;
     int friendsRefreshIndicator = 0;
 
-    while (!NadeoServices::IsAuthenticated("NadeoClubServices") && !NadeoServices::IsAuthenticated("NadeoLiveServices")) 
+    while (!NadeoServices::IsAuthenticated("NadeoClubServices") && !NadeoServices::IsAuthenticated("NadeoLiveServices"))
     {
         yield();
     }
 
-    while(true) 
+    while(true)
     {
         if (hasPermissionAndIsCOTDRunning())
         {
@@ -64,7 +64,7 @@ void Main()
             friendsRefreshIndicator++;
             string mapid = network.ClientManiaAppPlayground.Playground.Map.MapInfo.MapUid;
 
-            if (currentChallengeid == 0) 
+            if (currentChallengeid == 0)
             {
                 currentChallengeid = NadeoLiveServicesAPI::GetCurrentCOTDChallengeId();
             }
@@ -88,10 +88,7 @@ void Main()
                     else
                     {
                         currentClubName = "Club: " + ColoredString(NadeoLiveServicesAPI::GetClubName(currentClubId));
-                        //Show warning if more than 100 members
-                        int offset = 0;
-                        int length = 100;
-                        currentAccountIds = NadeoLiveServicesAPI::GetMemberIdsFromClub(currentClubId, offset, length);
+                        currentAccountIds = NadeoLiveServicesAPI::GetAllMemberIdsFromClub(currentClubId);
                     }
                 }
                 currentDisplayMode = Club;
@@ -107,8 +104,8 @@ void Main()
                 }
                 currentDisplayMode = Friends;
             }
-             
-            //Add current user if not already included  
+
+            //Add current user if not already included
             if (currentAccountIds.Find(currentUserId) < 0)
             {
                 currentAccountIds.InsertLast(currentUserId);
@@ -120,7 +117,7 @@ void Main()
             {
                 allResults.InsertLast(playerResults[n]);
             }
-            
+
             allResults.SortAsc();
 
             for(uint n = 0; n < numberOfPlayerDisplay && n < allResults.Length; n++ )
