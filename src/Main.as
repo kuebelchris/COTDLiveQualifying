@@ -7,7 +7,8 @@ void Render()
 {
 #if TMNEXT
 
-    if (hasPermissionAndIsCOTDRunning())
+            //if (hasPermissionAndIsCOTDRunning())
+        if (true)
     {
         if (!UI::IsGameUIVisible() && settings_hideIfUIHidden)
         {
@@ -46,7 +47,7 @@ void Main()
     int currentChallengeid = 0;
     int currentClubId = 0;
     string currentClubName = "";
-    DisplayMode currentDisplayMode = Club; //0 == Club, 1 == Friends
+    DisplayMode currentDisplayMode = DisplayMode::Club; //0 == Club, 1 == Friends
     array<string> currentAccountIds;
     int friendsRefreshIndicator = 0;
 
@@ -57,8 +58,22 @@ void Main()
 
     while(true)
     {
-        if (hasPermissionAndIsCOTDRunning())
+        //if (hasPermissionAndIsCOTDRunning())
+        if (true)
         {
+
+            NadeoCotdApi nadeoCotdApi;
+            MapMonitorCotdApi mapMonitorCotdApi;
+
+            ICotdApi@ cotdApi;
+            if (settings_cotdApi == CotdApi::Nadeo)
+            {
+                @cotdApi = @nadeoCotdApi;
+            }
+            else if (settings_cotdApi == CotdApi::MapMonitor)
+            {
+                @cotdApi = @mapMonitorCotdApi;
+            }
 
             string currentUserId = NadeoCoreAPI::getCurrentWebServicesUserId();
             friendsRefreshIndicator++;
@@ -88,10 +103,20 @@ void Main()
                     else
                     {
                         currentClubName = "Club: " + ColoredString(NadeoLiveServicesAPI::GetClubName(currentClubId));
-                        currentAccountIds = NadeoLiveServicesAPI::GetAllMemberIdsFromClub(currentClubId);
+
+                        int maxClubMembers = 0;
+                        if (settings_cotdApi == CotdApi::Nadeo)
+                        {
+                            maxClubMembers = 100;
+                        }
+                        else if (settings_cotdApi == CotdApi::MapMonitor)
+                        {
+                            maxClubMembers = 10000;
+                        }
+                        currentAccountIds = NadeoLiveServicesAPI::GetAllMemberIdsFromClub(currentClubId, maxClubMembers);
                     }
                 }
-                currentDisplayMode = Club;
+                currentDisplayMode = DisplayMode::Club;
             }
             else if(settings_displayMode == 1)
             {
@@ -102,7 +127,7 @@ void Main()
                     friendsRefreshIndicator = 0;
                     currentClubName = "Friends";
                 }
-                currentDisplayMode = Friends;
+                currentDisplayMode = DisplayMode::Friends;
             }
 
             //Add current user if not already included
@@ -111,7 +136,7 @@ void Main()
                 currentAccountIds.InsertLast(currentUserId);
             }
 
-            array<Result@> playerResults = NadeoLiveServicesAPI::GetCurrentStandingForPlayers(currentAccountIds, currentChallengeid, mapid);
+            array<Result@> playerResults = cotdApi.GetCurrentStandingForPlayers(currentAccountIds, currentChallengeid, mapid);
 
             for(uint n = 0; n < playerResults.Length; n++ )
             {
@@ -130,7 +155,7 @@ void Main()
             //Show Div 1 Cutoff
             if (settings_showDivOneCutoff)
             {
-                Result@ cutoff = NadeoLiveServicesAPI::GetDiv1CutoffTime(currentChallengeid, mapid);
+                Result@ cutoff = cotdApi.GetDiv1CutoffTime(currentChallengeid, mapid);
                 if (@cutoff != null)
                 {
                     SingleUserResultVM@ cutoffVM = VMMapper::ToSingleUserResultCutoffVM(cutoff);

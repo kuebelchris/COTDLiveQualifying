@@ -19,7 +19,7 @@ bool onlyOnOverlay = false;
 bool settings_hideIfUIHidden = true;
 
 [Setting category="Display Settings" name="Display Mode" description="Show club members or online Uplay friends"]
-DisplayMode settings_displayMode = Club;
+DisplayMode settings_displayMode = DisplayMode::Club;
 
 [Setting category="Display Settings" name="Number of displayed Players" description="The maximum number of shown players."]
 uint numberOfPlayerDisplay = 10;
@@ -32,3 +32,6 @@ bool settings_showDivOneCutoff = false;
 
 [Setting category="Club" name="Club id of the club" description="All players from the club will be tracked"]
 int settings_clubId = 0;
+
+[Setting category="API" name="Select which API to use"]
+CotdApi settings_cotdApi = CotdApi::Nadeo;
