@@ -21,6 +21,9 @@ bool settings_hideIfUIHidden = true;
 [Setting category="Display Settings" name="Display Mode" description="Show club members or online Uplay friends"]
 DisplayMode settings_displayMode = DisplayMode::Club;
 
+[Setting category="Display Settings" name="Show offline Friends, Required to display PlayStation Friends"]
+bool settings_showOfflineFriends = false;
+
 [Setting category="Display Settings" name="Number of displayed Players" description="The maximum number of shown players."]
 uint numberOfPlayerDisplay = 10;
 

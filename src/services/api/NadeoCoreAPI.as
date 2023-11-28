@@ -9,7 +9,7 @@ namespace NadeoCoreAPI {
 		if (friendListResult.HasSucceeded) {
 			MwFastBuffer<CFriend@> uplayFriendList = friendListResult.FriendList;
 			for (uint i = 0; i < uplayFriendList.Length; i++) {
-				if (uplayFriendList[i].Presence != "Offline" && uplayFriendList.Length < 100)
+				if ((settings_showOfflineFriends || uplayFriendList[i].Presence != "Offline") && uplayFriendList.Length < 100)
 				{
 					FriendList.InsertLast(uplayFriendList[i].AccountId);
 				}
