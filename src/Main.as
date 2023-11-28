@@ -7,8 +7,7 @@ void Render()
 {
 #if TMNEXT
 
-            //if (hasPermissionAndIsCOTDRunning())
-        if (true)
+    if (hasPermissionAndIsCOTDRunning())
     {
         if (!UI::IsGameUIVisible() && settings_hideIfUIHidden)
         {
@@ -58,8 +57,7 @@ void Main()
 
     while(true)
     {
-        //if (hasPermissionAndIsCOTDRunning())
-        if (true)
+        if (hasPermissionAndIsCOTDRunning())
         {
 
             NadeoCotdApi nadeoCotdApi;
