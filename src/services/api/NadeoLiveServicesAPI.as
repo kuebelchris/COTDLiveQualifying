@@ -2,8 +2,7 @@ namespace NadeoLiveServicesAPI
 {
 	int GetCurrentCOTDChallengeId()
 	{
-	    string compUrl = NadeoServices::BaseURLCompetition();
-	    auto matchstatus = FetchEndpoint(compUrl + "/api/cup-of-the-day/current");
+		auto matchstatus = MapMonitor::GetCotdCurrent();
 	    string challengeName = matchstatus["challenge"]["name"];
 	    return matchstatus["challenge"]["id"];
 	}
@@ -11,13 +10,13 @@ namespace NadeoLiveServicesAPI
 
 	string GetClubName(const int &in clubId)
 	{
-		string nadeoURL = NadeoServices::BaseURL();
+		string nadeoURL = NadeoServices::BaseURLLive();
 
 		if (clubId == 0)
 		{
 			return "Please select a Club in the settings";
 		}
-	    Json::Value clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId));
+	    Json::Value@ clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + clubId);
 	    //Check if result was found
 	    if (clubInfo.Length > 1)
 	    {
@@ -27,38 +26,61 @@ namespace NadeoLiveServicesAPI
 	    {
 	    	return "Could not load club";
 	    }
-	    
+
 	}
 
-	array<string> GetMemberIdsFromClub(const int &in clubId, const int &in offset, const int &in length)
+	array<string> GetAllMemberIdsFromClub(const int &in clubId, const int &in maximum)
 	{
-	    string nadeoURL = NadeoServices::BaseURL();
+		string nadeoURL = NadeoServices::BaseURLLive();
+		int offset = 0;
+		int length = 100;
 
 		array<string> clubMembers = {};
 	    if (clubId == 0)
 	    {
 	    	return clubMembers;
 	    }
-	    Json::Value clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId) + "/member?offset=" + Text::Format("%d", offset) + "&length=" + Text::Format("%d", length));
-	    //Check if result was found
-	    if (clubInfo.Length <= 1)
-	    {
-	    	return {};
-	    }
-	    Json::Value members = clubInfo["clubMemberList"];
-	    
-	    for(uint n = 0; n < members.Length && n < 100; n++)
-	    {
-	        string accountId = members[n]["accountId"];
-	        clubMembers.InsertLast(accountId);
-	    }
+
+		int maxPage = 1;
+		int currPage = 0;
+		int itemCount = -1;
+		while (currPage < Math::Min(10, maxPage)) {
+			Json::Value@ clubInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + clubId + "/member?offset=" + offset + "&length=" + length);
+			if (clubInfo.Length <= 1) {
+				break;
+			}
+			Json::Value@ members = clubInfo["clubMemberList"];
+			maxPage = clubInfo['maxPage'];
+			itemCount = clubInfo['itemCount'];
+			offset += length;
+			currPage += 1;
+
+			for(uint n = 0; n < members.Length; n++) {
+				string accountId = members[n]["accountId"];
+				clubMembers.InsertLast(accountId);
+			}
+			if (offset == maximum)
+			{
+				break;
+			}
+			else if (offset > maximum)
+			{
+				length = maximum - offset;
+			}
+		}
+		if (maxPage > 10) {
+			auto msg = "Your chosen club has more than 1000 members, but only the first 1000 members are loaded and checked.";
+			UI::ShowNotification(Meta::ExecutingPlugin().Name, msg, vec4(1, .5, 0, 1), 12500);
+			warn(msg);
+		}
+
 	    return clubMembers;
 	}
 
 	//TODO for later: feature to select a club via UI Dropdown.
 	/*array<ClubSelectItem@> GetAllCLubs()
 	{
-		string nadeoURL = NadeoServices::BaseURL();
+		string nadeoURL = NadeoServices::BaseURLLive();
 
 		Json::Value clubResult = FetchEndpointLiveServices(nadeoURL + "/api/token/club/mine?offset=0&length=100");
 		Json::Value clubList = clubResult["clubList"];
@@ -74,80 +96,11 @@ namespace NadeoLiveServicesAPI
 
 			clubs.InsertLast(ClubSelectItem(name, clubId, memberCount));
 		}
-		
+
 	    return clubs;
 	}*/
 
-	Result@ GetDiv1CutoffTime(const int &in challengeid, const string &in mapid)
-	{
-		string compUrl = NadeoServices::BaseURLCompetition();
-		string cotdEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "?offset=63&length=1";
-		Json::Value divOneCutoff = FetchEndpoint(cotdEndpoint);
-		if (divOneCutoff.Length > 0)
-		{
-			uint playerTime = divOneCutoff[0]["score"];
-	    	string playerId = divOneCutoff[0]["player"];
-	    	int playerRank = divOneCutoff[0]["rank"];
-			return Result(playerId, playerRank, 1, playerTime);
-		}
-		return null;
-	}
-
-	array<Result@> GetCurrentStandingForPlayers(const array<string> &in players, const int &in challengeid, const string &in mapid)
-	{
-	    string compUrl = NadeoServices::BaseURLCompetition();
-	    string playersEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "/players?players[]=";
-
-	    for(uint n = 0; n < players.Length; n++ )
-	    {
-	        playersEndpoint += "&players[]=" + players[n];
-	    }
-
-	    Json::Value currentStanding = FetchEndpoint(playersEndpoint);
-	    totalPlayers = currentStanding["cardinal"];
-	    Json::Value records = currentStanding["records"];
-
-	    array<Result@> results = {};
-            for(uint n = 0; n < records.Length; n++ )
-            {
-            	Json::Value playerResult = records[n];
-            	if (playerResult.Length > 0)
-            	{
-            		uint playerTime = playerResult["score"];
-	    			string playerId = playerResult["player"];
-	    			int playerRank = playerResult["rank"];
-	    			int currentDiv = calculateDiv(playerRank);
-				    
-            		Result@ playerDivTime = Result(playerId, playerRank, currentDiv, playerTime);
-                	results.InsertLast(playerDivTime);
-            	}
-                
-            }
-        return results;
-	}
-
-	int calculateDiv(const int &in playerRank)
-	{
-		if (playerRank == 1)
-		{
-			return 1;
-	    }
-	    else 
-		{
-			return ((playerRank - 1) / 64) + 1;
-		}
-	}
-
-	Json::Value FetchEndpoint(const string &in route) {
-	    auto req = NadeoServices::Get("NadeoClubServices", route);
-	    req.Start();
-	    while(!req.Finished()) {
-	        yield();
-	    }
-	    return Json::Parse(req.String());
-	}
-
-	Json::Value FetchEndpointLiveServices(const string &in route) {
+	Json::Value@ FetchEndpointLiveServices(const string &in route) {
 	    auto req = NadeoServices::Get("NadeoLiveServices", route);
 	    req.Start();
 	    while(!req.Finished()) {
