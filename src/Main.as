@@ -2,6 +2,7 @@
 int totalPlayers = 0;
 
 UserResultVM vm = UserResultVM();
+float refreshProgress = 0;
 
 void Render()
 {
@@ -19,7 +20,7 @@ void Render()
             return;
         }
 
-        COTDClubLiveUI::renderUI(vm);
+        COTDClubLiveUI::renderUI(vm, refreshProgress);
     }
 #endif
 }
@@ -59,7 +60,6 @@ void Main()
     {
         if (hasPermissionAndIsCOTDRunning())
         {
-
             NadeoCotdApi nadeoCotdApi;
             MapMonitorCotdApi mapMonitorCotdApi;
 
@@ -79,7 +79,7 @@ void Main()
 
             if (currentChallengeid == 0)
             {
-                currentChallengeid = NadeoLiveServicesAPI::GetCurrentCOTDChallengeId();
+                currentChallengeid = cotdApi.GetCurrentCOTDChallengeId();
             }
 
             array<Result@> allResults = {};
@@ -170,7 +170,19 @@ void Main()
             vm = UserResultVM();
             currentAccountIds = {};
         }
-        sleep(15000);
+
+        float progress = 100;
+        int progressBarInterval = 10;
+        float refreshTime = 15000;
+        while(refreshTime >= progress)
+        {
+            if (progress != 0)
+            {
+                refreshProgress = 1 - (progress / refreshTime);
+            }
+            progress = progress + progressBarInterval;
+            sleep(progressBarInterval);
+        }
     }
 #endif
 }

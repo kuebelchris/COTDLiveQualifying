@@ -2,7 +2,7 @@
 name = "COTD Live Qualifying"
 author = "KuebelChris"
 category = "Race"
-version = "1.5"
+version = "1.6"
 siteid = 238
 
 [script]

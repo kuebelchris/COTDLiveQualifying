@@ -1,6 +1,6 @@
 namespace COTDClubLiveUI
 {
-	void renderUI(const UserResultVM@ &in vm)
+	void renderUI(const UserResultVM@ &in vm, const float &in refreshBarProgress)
 	{
 		int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
 
@@ -54,6 +54,12 @@ namespace COTDClubLiveUI
         }
 
         UI::EndTable();
+
+        if (settings_showProgressBar)
+        {
+            UI::ProgressBar(refreshBarProgress, vec2(-1,1));
+        }
+    
         
         UI::EndGroup();
         

@@ -33,6 +33,9 @@ bool setttings_showClubTag = true;
 [Setting category="Display Settings" name="Show division 1 cutoff"]
 bool settings_showDivOneCutoff = false;
 
+[Setting category="Display Settings" name="Show refresh progress bar"]
+bool settings_showProgressBar = true;
+
 [Setting category="Club" name="Club id of the club" description="All players from the club will be tracked"]
 int settings_clubId = 0;
 
