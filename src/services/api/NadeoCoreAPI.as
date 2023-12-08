@@ -1,6 +1,6 @@
 namespace NadeoCoreAPI {
 
-	array<string> GetFriendList() {
+	array<string> GetFriendList(const uint &in maxFriends) {
 		array<string> FriendList;
 		auto app = cast<CTrackMania>(GetApp());
 		
@@ -9,7 +9,7 @@ namespace NadeoCoreAPI {
 		if (friendListResult.HasSucceeded) {
 			MwFastBuffer<CFriend@> uplayFriendList = friendListResult.FriendList;
 			for (uint i = 0; i < uplayFriendList.Length; i++) {
-				if ((settings_showOfflineFriends || uplayFriendList[i].Presence != "Offline") && uplayFriendList.Length < 100)
+				if ((settings_showOfflineFriends || uplayFriendList[i].Presence != "Offline") && uplayFriendList.Length < maxFriends)
 				{
 					FriendList.InsertLast(uplayFriendList[i].AccountId);
 				}

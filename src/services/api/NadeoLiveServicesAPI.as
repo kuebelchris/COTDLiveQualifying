@@ -1,7 +1,7 @@
 namespace NadeoLiveServicesAPI
 {
 	
-	string GetClubName(const int &in clubId)
+	string GetClubName(const uint &in clubId)
 	{
 		string nadeoURL = NadeoServices::BaseURLLive();
 
