@@ -1,9 +1,8 @@
 [SettingsTab name="Info"]
 void RenderSettingsAbout() {
     UI::Text("Limitations:");
-    UI::Text("Clubs are supported up to 1000 players, otherwise not all results of the players can be tracked.");
+    UI::Text("Clubs are supported up to 100 players (1000 when using MapMonitor), otherwise not all results of the players can be tracked.");
     UI::Text("Same applies to Uplay friends.");
-    UI::Text("Offline Uplay friends will not be tracked.");
     UI::Separator();
     UI::Text("Tipps:");
     UI::Text("You can get the club id by searching for the club at trackmania.io.");
@@ -32,6 +31,9 @@ bool setttings_showClubTag = true;
 
 [Setting category="Display Settings" name="Show division 1 cutoff"]
 bool settings_showDivOneCutoff = false;
+
+[Setting category="Display Settings" name="Show refresh progress bar"]
+bool settings_showProgressBar = true;
 
 [Setting category="Club" name="Club id of the club" description="All players from the club will be tracked"]
 int settings_clubId = 0;

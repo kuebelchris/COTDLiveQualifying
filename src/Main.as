@@ -2,6 +2,7 @@
 int totalPlayers = 0;
 
 UserResultVM vm = UserResultVM();
+float refreshProgress = 0;
 
 void Render()
 {
@@ -19,7 +20,7 @@ void Render()
             return;
         }
 
-        COTDClubLiveUI::renderUI(vm);
+        COTDClubLiveUI::renderUI(vm, refreshProgress);
     }
 #endif
 }
@@ -59,7 +60,6 @@ void Main()
     {
         if (hasPermissionAndIsCOTDRunning())
         {
-
             NadeoCotdApi nadeoCotdApi;
             MapMonitorCotdApi mapMonitorCotdApi;
 
@@ -79,7 +79,7 @@ void Main()
 
             if (currentChallengeid == 0)
             {
-                currentChallengeid = NadeoLiveServicesAPI::GetCurrentCOTDChallengeId();
+                currentChallengeid = cotdApi.GetCurrentCOTDChallengeId();
             }
 
             array<Result@> allResults = {};
@@ -102,16 +102,8 @@ void Main()
                     {
                         currentClubName = "Club: " + ColoredString(NadeoLiveServicesAPI::GetClubName(currentClubId));
 
-                        int maxClubMembers = 0;
-                        if (settings_cotdApi == CotdApi::Nadeo)
-                        {
-                            maxClubMembers = 100;
-                        }
-                        else if (settings_cotdApi == CotdApi::MapMonitor)
-                        {
-                            maxClubMembers = 10000;
-                        }
-                        currentAccountIds = NadeoLiveServicesAPI::GetAllMemberIdsFromClub(currentClubId, maxClubMembers);
+                       
+                        currentAccountIds = NadeoLiveServicesAPI::GetAllMemberIdsFromClub(currentClubId, getMaxedTrackedPlayers());
                     }
                 }
                 currentDisplayMode = DisplayMode::Club;
@@ -121,7 +113,7 @@ void Main()
                 //Refresh if displaymode was changed from club to friends, refresh every minute
                 if (currentAccountIds.Length == 0 || currentDisplayMode != settings_displayMode || friendsRefreshIndicator >= 4)
                 {
-                    currentAccountIds = NadeoCoreAPI::GetFriendList();
+                    currentAccountIds = NadeoCoreAPI::GetFriendList(getMaxedTrackedPlayers());
                     friendsRefreshIndicator = 0;
                     currentClubName = "Friends";
                 }
@@ -170,7 +162,19 @@ void Main()
             vm = UserResultVM();
             currentAccountIds = {};
         }
-        sleep(15000);
+
+        float progress = 100;
+        int progressBarInterval = 10;
+        float refreshTime = 15000;
+        while(refreshTime >= progress)
+        {
+            if (progress != 0)
+            {
+                refreshProgress = 1 - (progress / refreshTime);
+            }
+            progress = progress + progressBarInterval;
+            sleep(progressBarInterval);
+        }
     }
 #endif
 }
@@ -182,4 +186,17 @@ bool hasPermissionAndIsCOTDRunning()
     auto network = cast<CTrackManiaNetwork>(app.Network);
     auto server_info = cast<CTrackManiaNetworkServerInfo>(network.ServerInfo);
     return Permissions::PlayOnlineCompetition() && network.ClientManiaAppPlayground !is null && network.ClientManiaAppPlayground.Playground !is null && network.ClientManiaAppPlayground.Playground.Map !is null && server_info.CurGameModeStr == "TM_COTDQualifications_Online";
+}
+
+uint getMaxedTrackedPlayers()
+{
+    if (settings_cotdApi == CotdApi::Nadeo)
+    {
+        return 100;
+    }
+    else if (settings_cotdApi == CotdApi::MapMonitor)
+    {
+        return 1000;
+    }
+    return 0;
 }

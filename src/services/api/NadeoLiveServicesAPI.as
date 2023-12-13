@@ -1,14 +1,7 @@
 namespace NadeoLiveServicesAPI
 {
-	int GetCurrentCOTDChallengeId()
-	{
-		auto matchstatus = MapMonitor::GetCotdCurrent();
-	    string challengeName = matchstatus["challenge"]["name"];
-	    return matchstatus["challenge"]["id"];
-	}
-
-
-	string GetClubName(const int &in clubId)
+	
+	string GetClubName(const uint &in clubId)
 	{
 		string nadeoURL = NadeoServices::BaseURLLive();
 
