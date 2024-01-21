@@ -84,7 +84,6 @@ void Main()
             if (state_currentChallengeid == 0)
             {
                 state_currentChallengeid = cotdApi.GetCurrentCOTDChallengeId();
-                state_currentChallengeid = 7132;
             }
 
             array<Result@> allResults = {};
