@@ -6,11 +6,12 @@ string state_currentCustomName = "--";
 bool state_showFriends = settings_showFriends;
 bool state_showClub = settings_showClub;
 bool state_showCustom = settings_showCustomPlayers;
+bool state_showDivOneCutoff = settings_showDivOneCutoff;
 
 array<string> state_customPlayerListArray = {};
 string state_customPlayerList = settings_customPlayers;
 
-bool checkSettings()
+bool checkSettingsChanged()
 {
     if(state_currentClubId != settings_clubId)
     {
@@ -29,6 +30,10 @@ bool checkSettings()
         return true;
     }
     if(state_customPlayerList != settings_customPlayers)
+    {
+        return true;
+    }
+    if(state_showDivOneCutoff != settings_showDivOneCutoff)
     {
         return true;
     }

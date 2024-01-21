@@ -8,8 +8,7 @@ void Render()
 {
 #if TMNEXT
 
-    //if (hasPermissionAndIsCOTDRunning())
-    if (true)
+    if (hasPermissionAndIsCOTDRunning())
     {
         if (!UI::IsGameUIVisible() && settings_hideIfUIHidden)
         {
@@ -54,10 +53,9 @@ void Main()
 
     while(true)
     {
-        //if (hasPermissionAndIsCOTDRunning())
-        if (true)
+        if (hasPermissionAndIsCOTDRunning())
         {
-            settings_changed = checkSettings();
+            settings_changed = checkSettingsChanged();
             if(settings_changed)
             {
                 accountIds = {};
@@ -100,7 +98,7 @@ void Main()
                 {
                     if (settings_clubId == 0)
                     {
-                        state_currentClubName = ColoredString("$F33") + "Please select a Club in the settings" + ColoredString("$FFF");
+                        state_currentClubName = "$F33Please select a Club in the settings.";
                     }
                     else
                     {                
@@ -168,6 +166,7 @@ void Main()
                     singleResultVMs.SortAsc();
                 }
             }
+            state_showDivOneCutoff = settings_showDivOneCutoff;
 
             vm = VMMapper::ToUserResultVM(buildDisplayModeList(state_currentClubName), singleResultVMs);
             settings_changed = false;
@@ -185,6 +184,10 @@ void Main()
         float refreshTime = 15000;
         while(refreshTime >= progress)
         {
+            if(checkSettingsChanged())
+            {
+                break;
+            }
             if (progress != 0)
             {
                 refreshProgress = 1 - (progress / refreshTime);
@@ -233,7 +236,7 @@ array<string> buildDisplayModeList(string clubName)
 {
     if(!settings_showClub && !settings_showFriends && !settings_showCustomPlayers)
     {
-       return {"$F33No opponents selected!\n $FFF You can select\n-Club\n-Friends\n-Custom Players"};
+       return {"$F33No opponents selected!\n $FFFYou can select\n- Club\n- Friends\n- Custom Players"};
     }
 
     array<string> displayModeNames = {};
