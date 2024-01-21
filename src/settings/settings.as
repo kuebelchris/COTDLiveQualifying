@@ -7,6 +7,9 @@ void RenderSettingsAbout() {
     UI::Text("Tips:");
     UI::Text("You can get the club id by searching for the club at trackmania.io.");
     UI::Text("The Account ID of a player can be found on a trackmania.io player profile and looks like this: a1a2a3a4-b1b2-c1c2-d1d1-e1e2e3e4e5e6");
+    UI::Separator();
+    UI::Text("Contributors:");
+    UI::Text("Thanks to JanVan8ern, XertroV and huhen for contributing with new features and improvements.");
 }
 
 [Setting category="Display Settings" name="Window visible" description="To move the table, click and drag while the Openplanet overlay is visible"]
@@ -18,13 +21,13 @@ bool onlyOnOverlay = false;
 [Setting category="Display Settings" name="Only show when Game UI is visible" description="deactivating will always show the table"]
 bool settings_hideIfUIHidden = true;
 
-[Setting category="Display Settings" name="Club" description="Shows club members in the leaderboard"]
+[Setting category="Display Settings" name="Show Club" description="Shows club members in the leaderboard"]
 bool settings_showClub = true;
 
-[Setting category="Display Settings" name="Friends" description="Shows online friends in the leaderboard"]
+[Setting category="Display Settings" name="Show Friends" description="Shows online friends in the leaderboard"]
 bool settings_showFriends = false;
 
-[Setting category="Display Settings" name="Custom Players" description="Shows selected players in the leaderboard"]
+[Setting category="Display Settings" name="Show Custom Players" description="Shows selected players in the leaderboard"]
 bool settings_showCustomPlayers = false;
 
 [Setting category="Display Settings" name="Show offline Friends, Required to display PlayStation Friends"]

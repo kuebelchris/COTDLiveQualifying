@@ -25,7 +25,7 @@ namespace COTDClubLiveUI
         UI::Text("Cup info: \\$aaa" + totalPlayers + " players (" + Math::Ceil(totalPlayers/64.0) + " divs)\\$z");
         UI::TableNextRow();
         UI::TableNextColumn();
-        UI::Text(vm.clubName);
+        UI::Text(getDisplayModeDescription(vm.selectedModes));
         UI::EndTable();
 
         UI::BeginTable("ranking", 4, UI::TableFlags::SizingFixedFit);
@@ -65,4 +65,20 @@ namespace COTDClubLiveUI
         
         UI::End();
 	}
+
+    string getDisplayModeDescription(array<string> selectedModes)
+    {
+        string displayMode = "List: ";
+        for(uint i = 0; i < selectedModes.Length; i++) {
+            if (i == selectedModes.Length - 1)
+            {
+                displayMode = displayMode + selectedModes[i] + "$z";
+            }
+            else
+            {
+                displayMode = displayMode + " " + selectedModes[i] + "$z + ";
+            }
+        }
+        return ColoredString(displayMode);
+    }
 }
