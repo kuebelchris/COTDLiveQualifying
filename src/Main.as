@@ -183,10 +183,6 @@ void Main()
         float refreshTime = 15000;
         while(refreshTime >= progress)
         {
-            if(checkSettingsChanged())
-            {
-                break;
-            }
             if (progress != 0)
             {
                 refreshProgress = 1 - (progress / refreshTime);
@@ -198,7 +194,6 @@ void Main()
 #endif
 }
 
- //Only active with Club edition and during COTD Time Attack
 bool hasPermissionAndIsCOTDRunning()
 {
     auto app = cast<CTrackMania>(GetApp());
