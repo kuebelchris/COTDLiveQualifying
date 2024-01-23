@@ -1,17 +1,17 @@
 class UserResultVM
 {
-    string clubName;
+    array<string> selectedModes;
     array<SingleUserResultVM@> userResults;
 
     UserResultVM()
     {
-        this.clubName = "--";
+        this.selectedModes = {};
         this.userResults = {};
     }
 
-    UserResultVM(const string &in clubName, const array<SingleUserResultVM@> &in userResults)
+    UserResultVM(const array<string> &in clubName, const array<SingleUserResultVM@> &in userResults)
     {
-        this.clubName = clubName;
+        this.selectedModes = clubName;
         this.userResults = userResults;
     }
 }

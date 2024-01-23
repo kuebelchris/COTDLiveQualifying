@@ -1,6 +1,6 @@
 // Global variables
 int totalPlayers = 0;
-
+array<string> accountIds;
 UserResultVM vm = UserResultVM();
 float refreshProgress = 0;
 
@@ -35,21 +35,16 @@ void RenderMenu()
 }
 
 void Main()
-{
-#if TMNEXT
-
+{  
+#if TMNEXT    
     auto app = cast<CTrackMania>(GetApp());
     auto network = cast<CTrackManiaNetwork>(app.Network);
 
     NadeoServices::AddAudience("NadeoClubServices");
     NadeoServices::AddAudience("NadeoLiveServices");
 
-    int currentChallengeid = 0;
-    int currentClubId = 0;
-    string currentClubName = "";
-    DisplayMode currentDisplayMode = DisplayMode::Club; //0 == Club, 1 == Friends
-    array<string> currentAccountIds;
-    int friendsRefreshIndicator = 0;
+    bool settings_changed = false;
+    int friendsRefreshIndicator = 4; //Refreshes friends every 60 seconds
 
     while (!NadeoServices::IsAuthenticated("NadeoClubServices") && !NadeoServices::IsAuthenticated("NadeoLiveServices"))
     {
@@ -60,6 +55,14 @@ void Main()
     {
         if (hasPermissionAndIsCOTDRunning())
         {
+            settings_changed = checkSettingsChanged();
+            if(settings_changed)
+            {
+                accountIds = {};
+            }
+
+            array<string> displayModes = {};
+
             NadeoCotdApi nadeoCotdApi;
             MapMonitorCotdApi mapMonitorCotdApi;
 
@@ -72,61 +75,70 @@ void Main()
             {
                 @cotdApi = @mapMonitorCotdApi;
             }
-
-            string currentUserId = NadeoCoreAPI::getCurrentWebServicesUserId();
-            friendsRefreshIndicator++;
+                  
+            string currentUserId = NadeoCoreAPI::getCurrentWebServicesUserId();           
             string mapid = network.ClientManiaAppPlayground.Playground.Map.MapInfo.MapUid;
 
-            if (currentChallengeid == 0)
+            friendsRefreshIndicator++;
+            
+            if (state_currentChallengeid == 0)
             {
-                currentChallengeid = cotdApi.GetCurrentCOTDChallengeId();
+                state_currentChallengeid = cotdApi.GetCurrentCOTDChallengeId();
             }
 
             array<Result@> allResults = {};
             array<Result@> topResults = {};
 
-            bool newMembersFound = true;
-
-            if(settings_displayMode == 0)
+            //Club
+            if(settings_showClub)
             {
                 //Only reload club members if new club was selected or if displaymode was changed from club to friends
-                if (currentAccountIds.Length == 0 || currentDisplayMode != settings_displayMode || currentClubId != settings_clubId)
+                if (settings_changed)
                 {
-                    currentClubId = settings_clubId;
-                    if (currentClubId == 0)
+                    if (settings_clubId == 0)
                     {
-                        currentClubName = "Please select a Club in the settings";
-                        currentAccountIds = {};
+                        state_currentClubName = "$F33Please select a Club in the settings.";
                     }
                     else
-                    {
-                        currentClubName = "Club: " + ColoredString(NadeoLiveServicesAPI::GetClubName(currentClubId));
-
-                       
-                        currentAccountIds = NadeoLiveServicesAPI::GetAllMemberIdsFromClub(currentClubId, getMaxedTrackedPlayers());
+                    {                
+                        state_currentClubName = NadeoLiveServicesAPI::GetClubName(settings_clubId);
+                        addToAccountIds(NadeoLiveServicesAPI::GetAllMemberIdsFromClub(settings_clubId, getMaxedTrackedPlayers()));
                     }
                 }
-                currentDisplayMode = DisplayMode::Club;
             }
-            else if(settings_displayMode == 1)
+            state_showClub = settings_showClub;
+            state_currentClubId = settings_clubId;
+
+            //Friends
+            if(settings_showFriends)
             {
-                //Refresh if displaymode was changed from club to friends, refresh every minute
-                if (currentAccountIds.Length == 0 || currentDisplayMode != settings_displayMode || friendsRefreshIndicator >= 4)
+                if(settings_changed || friendsRefreshIndicator >= 4)
                 {
-                    currentAccountIds = NadeoCoreAPI::GetFriendList(getMaxedTrackedPlayers());
-                    friendsRefreshIndicator = 0;
-                    currentClubName = "Friends";
-                }
-                currentDisplayMode = DisplayMode::Friends;
+                    addToAccountIds(NadeoCoreAPI::GetFriendList(getMaxedTrackedPlayers()));
+                    friendsRefreshIndicator = 0;                                              
+                } 
             }
+            state_showFriends = settings_showFriends;  
 
-            //Add current user if not already included
-            if (currentAccountIds.Find(currentUserId) < 0)
+            //Custom Players
+            if(settings_showCustomPlayers)
             {
-                currentAccountIds.InsertLast(currentUserId);
+                if(settings_changed && settings_customPlayers.Length >= 36) //atleast 1 player    
+                {     
+                    state_customPlayerListArray = settings_customPlayers.Split("\n");
+                    addToAccountIds(state_customPlayerListArray);
+                } 
+            }    
+            state_showCustom = settings_showCustomPlayers;  
+            state_customPlayerList = settings_customPlayers;     
+
+            //Add local user if not already included
+            if (accountIds.Find(currentUserId) < 0)
+            {
+                accountIds.InsertLast(currentUserId);
             }
 
-            array<Result@> playerResults = cotdApi.GetCurrentStandingForPlayers(currentAccountIds, currentChallengeid, mapid);
+            array<Result@> playerResults = cotdApi.GetCurrentStandingForPlayers(accountIds, state_currentChallengeid, mapid);
 
             for(uint n = 0; n < playerResults.Length; n++ )
             {
@@ -145,7 +157,7 @@ void Main()
             //Show Div 1 Cutoff
             if (settings_showDivOneCutoff)
             {
-                Result@ cutoff = cotdApi.GetDiv1CutoffTime(currentChallengeid, mapid);
+                Result@ cutoff = cotdApi.GetDiv1CutoffTime(state_currentChallengeid, mapid);
                 if (@cutoff != null)
                 {
                     SingleUserResultVM@ cutoffVM = VMMapper::ToSingleUserResultCutoffVM(cutoff);
@@ -153,14 +165,17 @@ void Main()
                     singleResultVMs.SortAsc();
                 }
             }
+            state_showDivOneCutoff = settings_showDivOneCutoff;
 
-            vm = VMMapper::ToUserResultVM(currentClubName, singleResultVMs);
+            vm = VMMapper::ToUserResultVM(buildDisplayModeList(state_currentClubName), singleResultVMs);
+            settings_changed = false;
 
         } else {
             //Reset state once COTD quali ends
-            currentChallengeid = 0;
+            state_currentChallengeid = 0;
             vm = UserResultVM();
-            currentAccountIds = {};
+            accountIds = {};
+            totalPlayers = 0;
         }
 
         float progress = 100;
@@ -174,12 +189,11 @@ void Main()
             }
             progress = progress + progressBarInterval;
             sleep(progressBarInterval);
-        }
+        }       
     }
 #endif
 }
 
- //Only active with Club edition and during COTD Time Attack
 bool hasPermissionAndIsCOTDRunning()
 {
     auto app = cast<CTrackMania>(GetApp());
@@ -199,4 +213,38 @@ uint getMaxedTrackedPlayers()
         return 1000;
     }
     return 0;
+}
+
+void addToAccountIds(array<string> fetchedPlayers)
+{
+    for(uint p = 0; p < fetchedPlayers.Length; p++)
+    {
+        if (accountIds.Find(fetchedPlayers[p]) < 0 && accountIds.Length < getMaxedTrackedPlayers())
+        {
+            accountIds.InsertLast(fetchedPlayers[p]);
+        }
+    }
+}
+
+array<string> buildDisplayModeList(string clubName)
+{
+    if(!settings_showClub && !settings_showFriends && !settings_showCustomPlayers)
+    {
+       return {"$F33No opponents selected!\n $FFFYou can select\n- Club\n- Friends\n- Custom Players"};
+    }
+
+    array<string> displayModeNames = {};
+    if (settings_showClub)
+    {
+        displayModeNames.InsertLast(clubName);
+    }
+    if (settings_showFriends)
+    {
+        displayModeNames.InsertLast("Friends");
+    }
+    if (settings_showCustomPlayers)
+    {
+        displayModeNames.InsertLast("Custom");
+    }
+    return displayModeNames;
 }
