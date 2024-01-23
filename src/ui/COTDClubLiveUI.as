@@ -76,7 +76,7 @@ namespace COTDClubLiveUI
             }
             else
             {
-                displayMode = displayMode + " " + selectedModes[i] + "$z + ";
+                displayMode = displayMode + selectedModes[i] + "$z + ";
             }
         }
         return ColoredString(displayMode);
