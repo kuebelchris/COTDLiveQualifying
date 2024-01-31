@@ -178,7 +178,7 @@ void Main()
         }
 
         float progress = 100;
-        int progressBarInterval = 10;
+        int progressBarInterval = 60;
         float refreshTime = 15000;
         while(refreshTime >= progress)
         {
