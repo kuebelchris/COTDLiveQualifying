@@ -40,13 +40,12 @@ void Main()
     auto app = cast<CTrackMania>(GetApp());
     auto network = cast<CTrackManiaNetwork>(app.Network);
 
-    NadeoServices::AddAudience("NadeoClubServices");
     NadeoServices::AddAudience("NadeoLiveServices");
 
     bool settings_changed = false;
     int friendsRefreshIndicator = 4; //Refreshes friends every 60 seconds
 
-    while (!NadeoServices::IsAuthenticated("NadeoClubServices") && !NadeoServices::IsAuthenticated("NadeoLiveServices"))
+    while (!NadeoServices::IsAuthenticated("NadeoLiveServices"))
     {
         yield();
     }
@@ -179,7 +178,7 @@ void Main()
         }
 
         float progress = 100;
-        int progressBarInterval = 10;
+        int progressBarInterval = 60;
         float refreshTime = 15000;
         while(refreshTime >= progress)
         {

@@ -75,7 +75,7 @@ class NadeoCotdApi : ICotdApi
 	}
 
     Json::Value@ FetchEndpoint(const string &in route) {
-	    auto req = NadeoServices::Get("NadeoClubServices", route);
+	    auto req = NadeoServices::Get("NadeoLiveServices", route);
 	    req.Start();
 	    while(!req.Finished()) {
 	        yield();
