@@ -162,6 +162,10 @@ void Main()
                     SingleUserResultVM@ cutoffVM = VMMapper::ToSingleUserResultCutoffVM(cutoff);
                     singleResultVMs.InsertLast(cutoffVM);
                     singleResultVMs.SortAsc();
+
+                    //Experimental: predict div 1 cutoff time
+                    SingleUserResultVM@ cutoffPrediction = predictDiv1Cutoff(cutoff.time);
+                    //singleResultVMs.InsertLast(cutoffPrediction);
                 }
             }
             state_showDivOneCutoff = settings_showDivOneCutoff;
@@ -172,13 +176,14 @@ void Main()
         } else {
             //Reset state once COTD quali ends
             state_currentChallengeid = 0;
+            state_top64Times = {};
             vm = UserResultVM();
             accountIds = {};
             totalPlayers = 0;
         }
 
         float progress = 100;
-        int progressBarInterval = 60;
+        int progressBarInterval = 60; //Higher makes the progress bar looking unsmooth
         float refreshTime = 15000;
         while(refreshTime >= progress)
         {
@@ -246,4 +251,53 @@ array<string> buildDisplayModeList(string clubName)
         displayModeNames.InsertLast("Custom");
     }
     return displayModeNames;
+}
+
+SingleUserResultVM@ predictDiv1Cutoff(int currentCutoff)
+{
+    
+    
+    logProgress(currentCutoff);
+    // Get the current time of the 64th position and add it to the array
+    //state_top64Times.InsertLast(float(currentCutoff));
+
+    // Check if we have enough data to make a prediction
+    /*if (state_top64Times.Length >= 2)
+    {
+        // Calculate the average improvement per minute
+        float totalImprovement = state_top64Times[0] - state_top64Times[state_top64Times.Length - 1];
+        float avgImprovement = totalImprovement / (state_top64Times.Length - 1);
+
+        // Apply a diminishing improvement factor
+        float diminishingFactor = 0.8; // Adjust as needed
+        float predictedTime = state_top64Times[state_top64Times.Length - 1] - (50 * avgImprovement * diminishingFactor);
+
+        
+
+        return SingleUserResultVM(64, 1, int(predictedTime), "Cutoff prediction");
+    }
+    else
+    {*/
+        // Not enough data for prediction
+       return SingleUserResultVM(64, 1, 0, "Calculating Cutoff Prediction");
+    //}
+}
+
+void logProgress(int cutoff)
+{
+    IO::File file;
+    file.Open(IO::FromStorageFolder(Time::FormatString("%y_%m_%d", Time::get_Stamp()) + ".txt"), IO::FileMode::Append);
+    auto currentTimeStamp = Time::get_Stamp();
+    string currentTime = Time::FormatString("%H:%M:%S", currentTimeStamp);
+    string currentEpochTime = Text::Format("%d", currentTimeStamp);
+
+    auto app = cast<CTrackMania>(GetApp());
+    auto gameTime = app.Network.PlaygroundInterfaceScriptHandler.GameTime;
+    auto cp = cast<CSmArenaClient>(app.CurrentPlayground);
+    auto endTime = cp.Arena.Rules.RulesStateEndTime;
+
+    uint timeLeft = (endTime - gameTime)/1000;
+
+    file.Write(currentTime + "," + currentEpochTime + "," + Text::Format("%d", timeLeft) + "," + Text::Format("%d", cutoff) + "\r\n");
+    file.Close();
 }

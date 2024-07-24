@@ -11,6 +11,9 @@ bool state_showDivOneCutoff = settings_showDivOneCutoff;
 array<string> state_customPlayerListArray = {};
 string state_customPlayerList = settings_customPlayers;
 
+// Define an array to store the times of the current top 64 participants
+array<float> state_top64Times = {};
+
 bool checkSettingsChanged()
 {
     if(state_currentClubId != settings_clubId)
