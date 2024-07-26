@@ -168,6 +168,7 @@ void Main()
 
             vm = VMMapper::ToUserResultVM(buildDisplayModeList(state_currentClubName), singleResultVMs);
             settings_changed = false;
+            state_forceRefreshPlayers = false;
 
         } else {
             //Reset state once COTD quali ends
@@ -175,6 +176,7 @@ void Main()
             vm = UserResultVM();
             accountIds = {};
             totalPlayers = 0;
+            state_forceRefreshPlayers = true;
         }
 
         float progress = 100;

@@ -7,12 +7,17 @@ bool state_showFriends = settings_showFriends;
 bool state_showClub = settings_showClub;
 bool state_showCustom = settings_showCustomPlayers;
 bool state_showDivOneCutoff = settings_showDivOneCutoff;
+bool state_forceRefreshPlayers = false;
 
 array<string> state_customPlayerListArray = {};
 string state_customPlayerList = settings_customPlayers;
 
 bool checkSettingsChanged()
 {
+    if(state_forceRefreshPlayers)
+    {
+        return true;
+    }
     if(state_currentClubId != settings_clubId)
     {
         return true;
