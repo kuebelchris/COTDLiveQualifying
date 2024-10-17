@@ -12,7 +12,7 @@ class Result {
     }
 
     int opCmp(Result@ other) {
-        int diff = this.time - other.time;
+        int diff = this.rank - other.rank;
         return (diff == 0) ? 0 : ((diff > 0) ? 1 : -1);
     }
 }
