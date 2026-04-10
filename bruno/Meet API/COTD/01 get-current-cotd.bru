@@ -1,0 +1,32 @@
+meta {
+  name: Get Current COTD
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://meet.trackmania.nadeo.club/api/cup-of-the-day/current
+  body: none
+  auth: none
+}
+
+docs {
+  Gets the currently ongoing Cup of the Day (crossplay only).
+  Returns 204 No Content if no COTD is currently active.
+
+  Key fields in the response:
+    challenge.id        → Use as {{challenge_id}} for standings/records queries
+    challenge.name      → COTD name, e.g. "COTD 2024-04-10 #1"
+    competition.nbPlayers → Total qualifier participants
+    startDate / endDate → Unix timestamps for the COTD window
+
+  The qualifier (challenge) runs for 15 minutes before the cup rounds begin.
+  Save challenge.id to the environment to use with the Challenges endpoints.
+}
+
+script:post-response {
+  const data = res.getBody();
+  if (data && data.challenge && data.challenge.id) {
+    bru.setEnvVar("challenge_id", String(data.challenge.id));
+  }
+}

@@ -1,0 +1,51 @@
+meta {
+  name: Authenticate (NadeoServices)
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://prod.trackmania.core.nadeo.online/v2/authentication/token/basic
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Basic {{basic_credentials}}
+  User-Agent: COTDLiveQualifying / KuebelChris
+}
+
+body:json {
+  {
+    "audience": "NadeoServices"
+  }
+}
+
+docs {
+  Authenticates using a service account and requests a token for the NadeoServices audience.
+  Required for Core API endpoints (https://prod.trackmania.core.nadeo.online).
+
+  Setup:
+  1. Create a service account at https://www.trackmania.com/player/service-account
+  2. Set service_login and service_password in the Trackmania environment
+  3. Run this request — access and refresh tokens are saved automatically
+
+  Note: The Authorization header uses Basic auth with base64-encoded "login:password".
+  The pre-request script handles the encoding automatically.
+}
+
+script:pre-request {
+  const login = bru.getEnvVar("service_login");
+  const password = bru.getEnvVar("service_password");
+  const credentials = Buffer.from(login + ":" + password).toString("base64");
+  bru.setVar("basic_credentials", credentials);
+}
+
+script:post-response {
+  const data = res.getBody();
+  if (data && data.accessToken) {
+    bru.setEnvVar("access_token_nadeoservices", data.accessToken);
+    bru.setEnvVar("refresh_token_nadeoservices", data.refreshToken);
+  }
+}

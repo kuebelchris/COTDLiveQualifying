@@ -29,7 +29,7 @@ namespace UserManager
 			string unformattedClubTag = NadeoCoreAPI::GetPlayerTag(accountId);
 			if (unformattedClubTag != "")
 			{
-				displayName = "[" + ColoredString(unformattedClubTag) + "\\$z] " + displayName;
+				displayName = "[" + Text::OpenplanetFormatCodes(unformattedClubTag) + "\\$z] " + displayName;
 			}
 		}
 		

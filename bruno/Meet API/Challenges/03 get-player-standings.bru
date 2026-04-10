@@ -1,0 +1,30 @@
+meta {
+  name: Get Player Standings
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://meet.trackmania.nadeo.club/api/challenges/{{challenge_id}}/records/maps/{{map_id}}/players?players[]={{account_id}}
+  body: none
+  auth: none
+}
+
+docs {
+  Gets the qualifying standings for one or more specific players.
+  Used by COTDLiveQualifying to show live rankings for tracked players.
+
+  To query multiple players, append additional players[] params:
+    ?players[]=accountId1&players[]=accountId2&players[]=accountId3
+
+  Response fields per player:
+    .player  → accountId
+    .rank    → current qualifying rank
+    .score   → time in milliseconds
+
+  The response also includes:
+    .cardinal → total number of players who have set a time
+
+  Set challenge_id and map_id in the environment before running.
+  Set account_id to the player's UUID to test with a single player.
+}

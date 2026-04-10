@@ -1,0 +1,30 @@
+meta {
+  name: Refresh (NadeoLiveServices)
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://prod.trackmania.core.nadeo.online/v2/authentication/token/refresh
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: nadeo_v1 t={{refresh_token_nadeoliveservices}}
+  User-Agent: COTDLiveQualifying / KuebelChris
+}
+
+docs {
+  Refreshes the NadeoLiveServices access token without re-authenticating.
+  Access tokens expire after ~1 hour; refresh tokens are valid for ~1 day.
+  On success, updates access_token_nadeoliveservices and refresh_token_nadeoliveservices in the environment.
+}
+
+script:post-response {
+  const data = res.getBody();
+  if (data && data.accessToken) {
+    bru.setEnvVar("access_token_nadeoliveservices", data.accessToken);
+    bru.setEnvVar("refresh_token_nadeoliveservices", data.refreshToken);
+  }
+}

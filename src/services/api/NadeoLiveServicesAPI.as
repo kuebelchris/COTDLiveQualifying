@@ -70,28 +70,26 @@ namespace NadeoLiveServicesAPI
 	    return clubMembers;
 	}
 
-	//TODO for later: feature to select a club via UI Dropdown.
-	/*array<ClubSelectItem@> GetAllCLubs()
+	array<ClubInfo@> GetAllClubs()
 	{
+		array<ClubInfo@> clubs;
 		string nadeoURL = NadeoServices::BaseURLLive();
 
-		Json::Value clubResult = FetchEndpointLiveServices(nadeoURL + "/api/token/club/mine?offset=0&length=100");
-		Json::Value clubList = clubResult["clubList"];
-
-		array<ClubSelectItem@> clubs;
-		for (uint n = 0; n < clubList.Length; n++)
-		{
-			int clubId = clubList[n]["id"];
-			string name = clubList[n]["name"];
-
-			Json::Value memberInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId) + "/member?offset=0&length=1");
-			int memberCount = memberInfo["itemCount"];
-
-			clubs.InsertLast(ClubSelectItem(name, clubId, memberCount));
+		Json::Value@ clubResult = FetchEndpointLiveServices(nadeoURL + "/api/token/club/mine?offset=0&length=100");
+		if (clubResult.GetType() == Json::Type::Null) {
+			return clubs;
 		}
 
-	    return clubs;
-	}*/
+		Json::Value@ clubList = clubResult["clubList"];
+		for (uint n = 0; n < clubList.Length; n++) {
+			int clubId = clubList[n]["id"];
+			string name = clubList[n]["name"];
+			string tag = clubList[n]["tag"];
+			clubs.InsertLast(ClubInfo(clubId, name, tag));
+		}
+
+		return clubs;
+	}
 
 	Json::Value@ FetchEndpointLiveServices(const string &in route) {
 	    auto req = NadeoServices::Get("NadeoLiveServices", route);

@@ -1,0 +1,30 @@
+meta {
+  name: Get Challenge Leaderboard
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://meet.trackmania.nadeo.club/api/challenges/{{challenge_id}}/records/maps/{{map_id}}
+  body: none
+  auth: none
+}
+
+query {
+  offset: 0
+  length: 100
+}
+
+docs {
+  Gets the qualifying leaderboard for a specific challenge map.
+  Returns ranked records sorted by time (ascending).
+
+  Common offset values:
+    offset=0,  length=64   → Top 64 (Div 1 qualifiers)
+    offset=63, length=1    → Record at rank 64 = Div 1 cutoff time
+    offset=64, length=64   → Div 2 qualifiers
+
+  Set challenge_id and map_id in the environment before running.
+  Get challenge_id from "Get Current COTD" → challenge.id
+  Get map_id from the COTD response → challenge maps (UID string)
+}

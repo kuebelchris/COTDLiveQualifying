@@ -1,0 +1,25 @@
+meta {
+  name: Get API Routes
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://prod.trackmania.core.nadeo.online/api/routes
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: 
+  User-Agent: COTDLiveQualifying / KuebelChris
+}
+
+docs {
+  Lists all available Core API endpoints.
+  No authentication required — can be opened directly in a browser.
+
+  Other variants:
+    ?usage=Client  → endpoints for Ubisoft user accounts
+    ?usage=Server  → endpoints for dedicated server accounts
+}
