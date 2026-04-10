@@ -12,7 +12,7 @@ void LoadMyClubs()
     clubsLoaded = true;
 }
 
-[SettingsTab name="Club" icon="UsersAlt" order="1"]
+[SettingsTab name="Club" icon="Kenney::UsersAlt" order="1"]
 void RenderSettingsClubPicker()
 {
     if (!clubsLoaded && !clubsLoading) {

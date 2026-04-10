@@ -31,6 +31,8 @@ void RenderSettingsCustomPlayers()
         }
     }
 
+    UI::Text("Account ID:");
+
     // -- Add player row --
     UI::SetNextItemWidth(UI::GetContentRegionAvail().x * 0.8f);
     newPlayerId = UI::InputText("##newplayer", newPlayerId);
@@ -60,6 +62,7 @@ void RenderSettingsCustomPlayers()
             newPlayerId = "";
         }
     }
+    UI::Text("The Account ID for a player can be found on their trackmania.io.");
 
     UI::Separator();
 
