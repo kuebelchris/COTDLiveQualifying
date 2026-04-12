@@ -1,4 +1,4 @@
-namespace CutoffDisplay
+namespace CutoffService
 {
     // Total qualifying duration in seconds (14 minutes).
     // Used to normalise the time-remaining value in the prediction formula.
@@ -90,8 +90,8 @@ namespace CutoffDisplay
             int secsRemaining = GetSecondsRemaining(app);
             if (secsRemaining >= 0 && secsRemaining <= PREDICTION_WINDOW_SECS)
             {
-                int predictedMs = PredictFinalCutoff(cutoff.time, secsRemaining);
-                singleResultVMs.InsertLast(VMMapper::ToSingleUserResultCutoffPredictionVM(cutoff, predictedMs));
+                int predictedCutoff = PredictFinalCutoff(cutoff.time, secsRemaining);
+                singleResultVMs.InsertLast(VMMapper::ToSingleUserResultCutoffPredictionVM(cutoff, predictedCutoff));
                 rowAdded = true;
             }
         }

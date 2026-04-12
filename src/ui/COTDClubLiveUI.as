@@ -79,6 +79,6 @@ namespace COTDClubLiveUI
                 displayMode = displayMode + selectedModes[i] + "$z + ";
             }
         }
-        return ColoredString(displayMode);
+        return Text::OpenplanetFormatCodes(displayMode);
     }
 }

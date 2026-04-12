@@ -28,7 +28,7 @@ bool setttings_showClubTag = true;
 [Setting category="Display Settings" name="Show division 1 cutoff"]
 bool settings_showDivOneCutoff = false;
 
-[Setting category="Display Settings" name="Show Div 1 cutoff prediction" description="Predicts where the Div 1 cutoff time will end up at the end of qualifying, based on how fast it is still improving. Only shown during the last 5 minutes of qualifying, when the prediction is most accurate."]  
+[Setting category="Display Settings" name="Show division 1 cutoff prediction" description="Predicts where the Div 1 cutoff time will end up at the end of qualifying, based on how fast it is still improving. Only shown during the last 5 minutes of qualifying, when the prediction is most accurate."]  
 bool settings_showCutoffPrediction = false;
 
 [Setting category="Display Settings" name="Show refresh progress bar"]

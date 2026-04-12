@@ -1,46 +1,62 @@
 class NadeoCotdApi : ICotdApi
 {
-    
-	int GetCurrentCOTDChallengeId()
-	{
-	    string compUrl = NadeoServices::BaseURLMeet();
-	    auto matchstatus = FetchEndpoint(compUrl + "/api/cup-of-the-day/current");
-		if (matchstatus.GetType() == Json::Type::Null)
-	    {
-			warn("could not retreive cotd from Nadeo API");
-			return 0;
-		}
-	    string challengeName = matchstatus["challenge"]["name"];
-	    return matchstatus["challenge"]["id"];
-	}
-
-	// Returns the qualifier challenge ID for a named cup type.
+	// Returns the qualifier challenge ID for the current cup.
 	// type: "cotd" | "cotw" | "grand_race"
-	// Queries /api/cups-of-the-day?type={type}&length=1 which works for all three cup types.
+	// Finds the first crossplay entry where now is between (startDate - 2 min) and endDate.
+	// Returns 0 if qualifying has not started yet or has already ended.
 	int GetCurrentChallengeIdByType(const string &in type)
 	{
 		string compUrl = NadeoServices::BaseURLMeet();
-		Json::Value@ data = FetchEndpoint(compUrl + "/api/cups-of-the-day?type=" + type + "&length=1&offset=0");
-		if (data.GetType() == Json::Type::Null) {
+		//Usually, we will get 15 entries for a whole set of daily cotds (evening, night and morning COTD for crossplay, pc, luna, xb1 and psn), so we need to at least get the 15 newest cups to find the currently active one.
+		Json::Value@ data = FetchEndpoint(compUrl + "/api/cups-of-the-day?type=" + type + "&length=20&offset=0");
+		if (data.GetType() == Json::Type::Null)
+		{
 			warn("could not retrieve cups-of-the-day for type=" + type);
 			return 0;
 		}
 		Json::Value@ cups = data["COTDs"];
-		print("NadeoCotdApi::GetCurrentChallengeIdByType raw cups JSON: " + Json::Write(cups));
-		if (cups.GetType() != Json::Type::Array || cups.Length == 0) {
+		if (cups.GetType() != Json::Type::Array || cups.Length == 0)
+		{
 			warn("no cups found for type=" + type);
 			return 0;
 		}
-		return cups[0]["challenge"]["id"];
+
+		int64 now = Time::Stamp;
+
+		for (uint i = 0; i < cups.Length; i++)
+		{
+			Json::Value@ cup = cups[i];
+			string partition = cup["competition"]["partition"];
+			if (partition != "crossplay")
+			{
+				continue;
+			}
+
+			int64 startDate = int64(cup["startDate"]) - 120; // 2 min early, servers open a minute before the qualifying officially starts
+			int64 endDate   = int64(cup["endDate"]);
+
+			if (now < startDate)
+			{
+				continue;
+			}
+			if (now > endDate)
+			{
+				continue;
+			}
+
+			int challengeId = cup["challenge"]["id"];
+			return challengeId;
+		}
+
+		warn("no active cup found for type=" + type + "; qualifying has not started yet or has already ended");
+		return 0;
 	}
 
 	Result@ GetDiv1CutoffTime(const int&in challengeid, const string&in mapid)
 	{
         string compUrl = NadeoServices::BaseURLMeet();
-		print("NadeoCotdApi::GetDiv1CutoffTime challengeid=" + challengeid + " mapid=" + mapid);
 		string cotdEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "?offset=63&length=1";
 		Json::Value divOneCutoff = FetchEndpoint(cotdEndpoint);
-		print("NadeoCotdApi::GetDiv1CutoffTime");
 
 		if (divOneCutoff.GetType() == Json::Type::Null)
 	    {
@@ -60,7 +76,6 @@ class NadeoCotdApi : ICotdApi
 	array<Result@> GetCurrentStandingForPlayers(const array<string>&in players, const int&in challengeid, const string&in mapid)
 	{
 		array<Result@> results = {};
-		print("NadeoCotdApi::GetCurrentStandingForPlayers challengeid=" + challengeid + " mapid=" + mapid + " players=" + players.Length);
 
         string compUrl = NadeoServices::BaseURLMeet();
 	    string playersEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "/players?players[]=";
@@ -70,7 +85,6 @@ class NadeoCotdApi : ICotdApi
 	        playersEndpoint += "&players[]=" + players[n];
 	    }
 
-		print("NadeoCotdApi: fetching " + playersEndpoint);
 	    Json::Value currentStanding = FetchEndpoint(playersEndpoint);
 		if (currentStanding.GetType() == Json::Type::Null)
 	    {
@@ -79,7 +93,6 @@ class NadeoCotdApi : ICotdApi
 		}
 
 	    totalPlayers = currentStanding["cardinal"];
-		print("NadeoCotdApi: cardinal=" + totalPlayers + " records=" + currentStanding["records"].Length);
 	    Json::Value records = currentStanding["records"];
 
         for(uint n = 0; n < records.Length; n++ )
@@ -107,7 +120,6 @@ class NadeoCotdApi : ICotdApi
 	        yield();
 	    }
 	    string raw = req.String();
-	    print("NadeoCotdApi::FetchEndpoint raw response: " + raw);
 	    return Json::Parse(raw);
 	}
 

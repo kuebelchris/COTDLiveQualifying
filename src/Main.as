@@ -61,21 +61,15 @@ void Main()
 }
 
 // COTD, COTW, and Grand Enduro all use the same qualifier game mode script.
-// TM_TimeAttackDaily_Online is the older name for the qualifier (pre-2023).
 bool hasPermissionAndIsQualifyingRunning()
 {
-
-    return true;
-
-    /*auto app = cast<CTrackMania>(GetApp());
+    auto app = cast<CTrackMania>(GetApp());
     auto network = cast<CTrackManiaNetwork>(app.Network);
     auto server_info = cast<CTrackManiaNetworkServerInfo>(network.ServerInfo);
     string mode = server_info.CurGameModeStr;
-    bool modeMatch = mode == "TM_COTDQualifications_Online"
-                  || mode == "TM_TimeAttackDaily_Online";
     return Permissions::PlayOnlineCompetition()
         && network.ClientManiaAppPlayground !is null
         && network.ClientManiaAppPlayground.Playground !is null
         && network.ClientManiaAppPlayground.Playground.Map !is null
-        && modeMatch;*/
+        && mode == "TM_COTDQualifications_Online";
 }

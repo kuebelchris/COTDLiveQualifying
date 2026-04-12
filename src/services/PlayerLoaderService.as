@@ -1,10 +1,9 @@
-namespace PlayerLoader
+namespace PlayerLoaderService
 {
     int friendsRefreshIndicator = 4;
 
     void LoadAll(bool settingsChanged)
     {
-        print("PlayerLoader::LoadAll settingsChanged=" + settingsChanged + " showClub=" + settings_showClub + " showFriends=" + settings_showFriends + " showCustom=" + settings_showCustomPlayers);
         if (settings_showClub && settingsChanged)
         {
             LoadClub();
@@ -21,12 +20,10 @@ namespace PlayerLoader
         }
 
         AddSelf();
-        print("PlayerLoader::LoadAll done, accountIds.Length=" + accountIds.Length);
     }
 
     void LoadClub()
     {
-        print("PlayerLoader::LoadClub clubId=" + settings_clubId);
         if (settings_clubId == 0)
         {
             state_currentClubName = "$F33Please select a Club in the settings.";
@@ -34,18 +31,15 @@ namespace PlayerLoader
         }
         state_currentClubName = NadeoLiveServicesAPI::GetClubName(settings_clubId);
         array<string> members = NadeoLiveServicesAPI::GetAllMemberIdsFromClub(settings_clubId, QualifyingSession::GetMaxTrackedPlayers());
-        print("PlayerLoader::LoadClub fetched " + members.Length + " members");
         AddAccountIds(members);
     }
 
     void LoadFriends(bool settingsChanged)
     {
         friendsRefreshIndicator++;
-        print("PlayerLoader::LoadFriends indicator=" + friendsRefreshIndicator + " settingsChanged=" + settingsChanged);
         if (settingsChanged || friendsRefreshIndicator >= 4)
         {
             array<string> friends = NadeoCoreAPI::GetFriendList(QualifyingSession::GetMaxTrackedPlayers());
-            print("PlayerLoader::LoadFriends fetched " + friends.Length + " friends");
             AddAccountIds(friends);
             friendsRefreshIndicator = 0;
         }

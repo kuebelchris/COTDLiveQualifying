@@ -6,32 +6,27 @@ namespace QualifyingSession
     void RunLoop()
     {
         bool settingsChanged = checkSettingsChanged();
-        print("RunLoop: settingsChanged=" + settingsChanged);
         if (settingsChanged)
         {
             accountIds = {};
             @cotdApi = ResolveCotdApi();
         }
 
-        PlayerLoader::LoadAll(settingsChanged);
-        print("RunLoop: accountIds.Length=" + accountIds.Length);
+        PlayerLoaderService::LoadAll(settingsChanged);
 
         string mapid = GetCurrentMapUid();
-        print("RunLoop: mapid=" + mapid);
 
         if (state_currentChallengeid == 0)
         {
             state_activeCupType = ResolveCupType(mapid);
-            print("RunLoop: resolving challenge for cupType=" + state_activeCupType);
             state_currentChallengeid = nadeoCotdApi.GetCurrentChallengeIdByType(state_activeCupType);
-            print("RunLoop: challengeid=" + state_currentChallengeid);
         }
 
         array<SingleUserResultVM@> singleResultVMs = BuildResultVMs(cotdApi, mapid);
 
         if (settings_showDivOneCutoff || settings_showCutoffPrediction)
         {
-            CutoffDisplay::AppendCutoffRows(singleResultVMs, cotdApi, state_currentChallengeid, mapid, cast<CTrackMania>(GetApp()));
+            CutoffService::AppendCutoffRows(singleResultVMs, cotdApi, state_currentChallengeid, mapid, cast<CTrackMania>(GetApp()));
         }
 
         SyncDisplayState();
