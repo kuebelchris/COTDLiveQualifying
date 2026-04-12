@@ -35,10 +35,10 @@ No additional npm packages are required — the script uses only the Node.js sta
 
 ## Running the analysis
 
-The quickest way is to run the included PowerShell helper:
+The quickest way is to run the included PowerShell helper, passing the path to your data directory:
 
 ```powershell
-.\analysis\fit-formula.ps1
+.\analysis\fit-formula.ps1 "C:\Users\<you>\AppData\Local\..\OpenplanetNext\PluginStorage\COTDLiveQualifying"
 ```
 
 It runs `analyze_cutoffs.js`, prints the full analysis to the terminal, and then prints just the final formula so you can copy it directly into the plugin.
@@ -46,7 +46,7 @@ It runs `analyze_cutoffs.js`, prints the full analysis to the terminal, and then
 To run the script manually:
 
 ```powershell
-node .\analysis\analyze_cutoffs.js
+node .\analysis\analyze_cutoffs.js "C:\Users\<you>\AppData\Local\..\OpenplanetNext\PluginStorage\COTDLiveQualifying"
 ```
 
 ---
@@ -88,10 +88,10 @@ FINAL FORMULA
     int predictedFinal = int(currentCutoff * correction);
 ```
 
-Open `src/services/CutoffDisplay.as` and update the two constants in `PredictFinalCutoff`:
+Open `src/services/CutoffService.as` and update the two constants in `PredictFinalCutoff`:
 
 ```angelscript
-float correction = 1.0f - 0.0553f * Math::Pow(r, 1.572f);
+float correction = 1.0f - 0.0824f * Math::Pow(r, 1.5962f);
 //                         ^^^^^^                ^^^^^
 //                           a                    b
 ```

@@ -9,7 +9,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = 'C:\\Users\\Christopher\\OpenplanetNext\\PluginStorage\\COTDLiveQualifying';
+const DATA_DIR = process.argv[2];
+if (!DATA_DIR) {
+    console.error('Usage: node analyze_cutoffs.js <data-dir>');
+    process.exit(1);
+}
 const TOTAL_SECONDS = 840; // 14 minutes (empirical max ~840s remaining at start)
 
 // ─── Parse all files ────────────────────────────────────────────────────────

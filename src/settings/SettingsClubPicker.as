@@ -45,9 +45,9 @@ void RenderSettingsClubPicker()
         array<string> labels;
         for (uint i = 0; i < myClubs.Length; i++) {
             string label = Text::OpenplanetFormatCodes(myClubs[i].name);
-            string formattedTag = Text::OpenplanetFormatCodes(myClubs[i].tag) + "\\$z";
+            string formattedTag = Text::OpenplanetFormatCodes(myClubs[i].tag);
             if (formattedTag.Length > 0) {
-                label = "[" + formattedTag + "] " + label;
+                label = "[" + formattedTag + "\\$z] " + label;
             }
             labels.InsertLast(label);
         }

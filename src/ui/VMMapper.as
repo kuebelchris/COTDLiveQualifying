@@ -20,7 +20,7 @@ namespace VMMapper
 
 	SingleUserResultVM@ ToSingleUserResultCutoffVM(const Result &in result)
 	{
-		return SingleUserResultVM(result.rank, result.div, result.time, UserManager::GetDisplayNameForAccount(result.accountId), false, false);
+		return SingleUserResultVM(result.rank, result.div, result.time, UserManager::GetDisplayNameForAccount(result.accountId), false, true);
 	}
 
 	SingleUserResultVM@ ToSingleUserResultCutoffPredictionVM(const Result &in result, const int &in predictedTime)

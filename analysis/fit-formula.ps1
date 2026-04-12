@@ -8,11 +8,21 @@
     Runs analyze_cutoffs.js with Node.js, streams the full analysis to the
     terminal, then extracts and highlights the final AngelScript formula line
     so you can copy it straight into PredictFinalCutoff() in
-    src/services/CutoffDisplay.as.
+    src/services/CuttofService.as.
+
+.PARAMETER DataDir
+    Path to the folder containing the .txt snapshot files written by the plugin.
+    Defaults to the standard Openplanet plugin storage location.
 
 .EXAMPLE
     .\analysis\fit-formula.ps1
+    .\analysis\fit-formula.ps1 "C:\Users\Me\AppData\Local\..\OpenplanetNext\PluginStorage\COTDLiveQualifying"
 #>
+
+param(
+    [Parameter(Position = 0)]
+    [string]$DataDir = (Join-Path $env:LOCALAPPDATA '..\OpenplanetNext\PluginStorage\COTDLiveQualifying')
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -41,7 +51,9 @@ Write-Host ""
 Write-Host "Running analysis - this may take a few seconds (gradient descent fitting)..." -ForegroundColor Cyan
 Write-Host ""
 
-$allLines = & node $analyzeJs 2>&1
+$DataDir = (Resolve-Path $DataDir -ErrorAction Stop).Path
+
+$allLines = & node $analyzeJs $DataDir 2>&1
 
 # Print all lines as they would appear normally
 $allLines | ForEach-Object { Write-Host $_ }

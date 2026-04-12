@@ -34,14 +34,12 @@ namespace CutoffService
     // Predicts the final Div 1 cutoff time using a power-law decay model fitted
     // across 78 recorded qualifying sessions (3 777 snapshots).
     //
-    // Model:  correction = 1 - 0.0553 * (R / 840)^1.572
+    // Model:  correction = 1 - 0.0824 * (R / 840)^1.5962
     //         predicted  = currentCutoffMs * correction
     //
     // Accuracy (mean absolute error by time remaining):
     //   5 min left : ~236 ms MAE   |   3 min left : ~100 ms MAE
     //   2 min left :  ~54 ms MAE   |   1 min left :  ~23 ms MAE
-    //
-    // The formula is a single multiply + Math::Pow — no measurable game impact.
     int PredictFinalCutoff(int currentCutoffMs, int secsRemaining)
     {
         if (secsRemaining <= 0)
@@ -61,9 +59,6 @@ namespace CutoffService
         return int(float(currentCutoffMs) * correction);
     }
 
-    // Appends cutoff and/or cutoff-prediction rows to singleResultVMs,
-    // fetching the cutoff once regardless of which combination of settings is on.
-    // Callers must pass the ICotdApi handle and current challenge/map identifiers.
     void AppendCutoffRows(
         array<SingleUserResultVM@> &inout singleResultVMs,
         ICotdApi@ cotdApi,
