@@ -23,4 +23,9 @@ namespace VMMapper
 		return SingleUserResultVM(result.rank, result.div, result.time, "Div 1 Cutoff");
 	}
 
+	SingleUserResultVM@ ToSingleUserResultCutoffPredictionVM(const Result &in result, const int &in predictedTimeMs)
+	{
+		return SingleUserResultVM(result.rank, result.div, predictedTimeMs, "Div 1 Cutoff ~", true);
+	}
+
 }

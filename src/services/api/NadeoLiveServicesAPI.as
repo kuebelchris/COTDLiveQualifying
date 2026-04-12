@@ -91,6 +91,46 @@ namespace NadeoLiveServicesAPI
 		return clubs;
 	}
 
+	// Returns the map UID for the current Cup of the Week map.
+	// Endpoint: GET /api/campaign/cup-of-the-week?length=1
+	string GetCotwMapUid()
+	{
+		string nadeoURL = NadeoServices::BaseURLLive();
+		Json::Value@ data = FetchEndpointLiveServices(nadeoURL + "/api/campaign/cup-of-the-week?length=1&offset=0");
+		if (data.GetType() == Json::Type::Null) { 
+			return ""; 
+		}
+		Json::Value@ list = data["campaignList"];
+		if (list.GetType() != Json::Type::Array || list.Length == 0) { 
+			return ""; 
+		}
+		Json::Value@ playlist = list[0]["playlist"];
+		if (playlist.GetType() != Json::Type::Array || playlist.Length == 0) { 
+			return ""; 
+		}
+		return playlist[0]["mapUid"];
+	}
+
+	// Returns the map UID for the current Grand Enduro map.
+	// Endpoint: GET /api/campaign/weekly-grands?length=1
+	string GetGrandEnduroMapUid()
+	{
+		string nadeoURL = NadeoServices::BaseURLLive();
+		Json::Value@ data = FetchEndpointLiveServices(nadeoURL + "/api/campaign/weekly-grands?length=1&offset=0");
+		if (data.GetType() == Json::Type::Null) { 
+			return ""; 
+		}
+		Json::Value@ list = data["campaignList"];
+		if (list.GetType() != Json::Type::Array || list.Length == 0) { 
+			return ""; 
+		}
+		Json::Value@ playlist = list[0]["playlist"];
+		if (playlist.GetType() != Json::Type::Array || playlist.Length == 0) { 
+			return ""; 
+		}
+		return playlist[0]["mapUid"];
+	}
+
 	Json::Value@ FetchEndpointLiveServices(const string &in route) {
 	    auto req = NadeoServices::Get("NadeoLiveServices", route);
 	    req.Start();

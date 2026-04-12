@@ -4,12 +4,22 @@ class SingleUserResultVM
     private int div;
     private int time;
     private string playerDisplayName;
+    private bool isPrediction;
 
     SingleUserResultVM(const int &in rank, const int &in div, const int &in time, const string &in playerDisplayName) {
         this.rank = rank;
         this.div = div;
         this.time = time;
         this.playerDisplayName = playerDisplayName;
+        this.isPrediction = false;
+    }
+
+    SingleUserResultVM(const int &in rank, const int &in div, const int &in time, const string &in playerDisplayName, const bool &in isPrediction) {
+        this.rank = rank;
+        this.div = div;
+        this.time = time;
+        this.playerDisplayName = playerDisplayName;
+        this.isPrediction = isPrediction;
     }
 
     string DivString() {
@@ -17,6 +27,10 @@ class SingleUserResultVM
     }
 
     string TimeString() {
+        if (this.isPrediction)
+        {
+            return "\\$ff0" + Time::Format(this.time) + "\\$z";
+        }
         if (this.rank == 64)
         {
             return "\\$f80" + Time::Format(this.time) + "\\$z";
@@ -29,6 +43,10 @@ class SingleUserResultVM
     }
 
     string RankString() {
+        if (this.isPrediction)
+        {
+            return "\\$ff0" + Text::Format("%d", this.rank);
+        }
         if (this.rank == 64)
         {
             return "\\$f80" + Text::Format("%d", this.rank);

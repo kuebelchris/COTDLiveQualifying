@@ -14,11 +14,34 @@ class NadeoCotdApi : ICotdApi
 	    return matchstatus["challenge"]["id"];
 	}
 
+	// Returns the qualifier challenge ID for a named cup type.
+	// type: "cotd" | "cotw" | "grand_race"
+	// Queries /api/cups-of-the-day?type={type}&length=1 which works for all three cup types.
+	int GetCurrentChallengeIdByType(const string &in type)
+	{
+		string compUrl = NadeoServices::BaseURLMeet();
+		Json::Value@ data = FetchEndpoint(compUrl + "/api/cups-of-the-day?type=" + type + "&length=1&offset=0");
+		if (data.GetType() == Json::Type::Null) {
+			warn("could not retrieve cups-of-the-day for type=" + type);
+			return 0;
+		}
+		Json::Value@ cups = data["COTDs"];
+		print("NadeoCotdApi::GetCurrentChallengeIdByType raw cups JSON: " + Json::Write(cups));
+		if (cups.GetType() != Json::Type::Array || cups.Length == 0) {
+			warn("no cups found for type=" + type);
+			return 0;
+		}
+		return cups[0]["challenge"]["id"];
+	}
+
 	Result@ GetDiv1CutoffTime(const int&in challengeid, const string&in mapid)
 	{
         string compUrl = NadeoServices::BaseURLMeet();
+		print("NadeoCotdApi::GetDiv1CutoffTime challengeid=" + challengeid + " mapid=" + mapid);
 		string cotdEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "?offset=63&length=1";
 		Json::Value divOneCutoff = FetchEndpoint(cotdEndpoint);
+		print("NadeoCotdApi::GetDiv1CutoffTime");
+
 		if (divOneCutoff.GetType() == Json::Type::Null)
 	    {
 			warn("could not retrieve div 1 cutoff from Nadeo API");
@@ -37,6 +60,7 @@ class NadeoCotdApi : ICotdApi
 	array<Result@> GetCurrentStandingForPlayers(const array<string>&in players, const int&in challengeid, const string&in mapid)
 	{
 		array<Result@> results = {};
+		print("NadeoCotdApi::GetCurrentStandingForPlayers challengeid=" + challengeid + " mapid=" + mapid + " players=" + players.Length);
 
         string compUrl = NadeoServices::BaseURLMeet();
 	    string playersEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "/players?players[]=";
@@ -46,6 +70,7 @@ class NadeoCotdApi : ICotdApi
 	        playersEndpoint += "&players[]=" + players[n];
 	    }
 
+		print("NadeoCotdApi: fetching " + playersEndpoint);
 	    Json::Value currentStanding = FetchEndpoint(playersEndpoint);
 		if (currentStanding.GetType() == Json::Type::Null)
 	    {
@@ -54,6 +79,7 @@ class NadeoCotdApi : ICotdApi
 		}
 
 	    totalPlayers = currentStanding["cardinal"];
+		print("NadeoCotdApi: cardinal=" + totalPlayers + " records=" + currentStanding["records"].Length);
 	    Json::Value records = currentStanding["records"];
 
         for(uint n = 0; n < records.Length; n++ )
@@ -80,7 +106,9 @@ class NadeoCotdApi : ICotdApi
 	    while(!req.Finished()) {
 	        yield();
 	    }
-	    return Json::Parse(req.String());
+	    string raw = req.String();
+	    print("NadeoCotdApi::FetchEndpoint raw response: " + raw);
+	    return Json::Parse(raw);
 	}
 
     int calculateDiv(const int &in playerRank)

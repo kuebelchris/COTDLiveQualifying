@@ -1,4 +1,6 @@
 int state_currentChallengeid = 0;
+// "cotd" | "cotw" | "grand_race" — resolved by matching current map UID
+string state_activeCupType = "cotd";
 int state_currentClubId = settings_clubId;  
 string state_currentClubName = "--";
 string state_currentCustomName = "--";
@@ -7,7 +9,9 @@ bool state_showFriends = settings_showFriends;
 bool state_showClub = settings_showClub;
 bool state_showCustom = settings_showCustomPlayers;
 bool state_showDivOneCutoff = settings_showDivOneCutoff;
-bool state_forceRefreshPlayers = false;
+bool state_showCutoffPrediction = settings_showCutoffPrediction;
+CotdApi state_cotdApi = settings_cotdApi;
+bool state_forceRefreshPlayers = true;
 
 array<string> state_customPlayerListArray = {};
 string state_customPlayerList = settings_customPlayers;
@@ -39,6 +43,14 @@ bool checkSettingsChanged()
         return true;
     }
     if(state_showDivOneCutoff != settings_showDivOneCutoff)
+    {
+        return true;
+    }
+    if(state_showCutoffPrediction != settings_showCutoffPrediction)
+    {
+        return true;
+    }
+    if(state_cotdApi != settings_cotdApi)
     {
         return true;
     }
