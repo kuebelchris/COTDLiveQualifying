@@ -2,7 +2,7 @@
 <#
 .SYNOPSIS
     Fits the Div 1 cutoff prediction formula from recorded COTD qualifying data
-    and prints the result ready to paste into CutoffDisplay.as.
+    and prints the result ready to paste into CutoffServicey.as.
 
 .DESCRIPTION
     Runs analyze_cutoffs.js with Node.js, streams the full analysis to the
@@ -80,7 +80,7 @@ if ($match.Success) {
 
 Write-Host ""
 Write-Host ("=" * 70) -ForegroundColor Yellow
-Write-Host "  FORMULA TO COPY INTO src/services/CutoffDisplay.as" -ForegroundColor Yellow
+Write-Host "  FORMULA TO COPY INTO src/services/CutoffService.as" -ForegroundColor Yellow
 Write-Host ("=" * 70) -ForegroundColor Yellow
 Write-Host ""
 Write-Host "  In PredictFinalCutoff(), replace the correction line with:" -ForegroundColor White

@@ -79,12 +79,12 @@ FINAL FORMULA
 
   Given: current_cutoff C (ms) and seconds_remaining R (0–840)
 
-  correction  =  1 - 0.0553 × (R ÷ 840)^1.5717
+  correction  =  1 - 0.0824 × (R ÷ 840)^1.5962
   predicted_final  =  C × correction
 
   AngelScript version:
     float r = float(secsRemaining) / 840.0f;
-    float correction = 1.0f - 0.0553f * Math::Pow(r, 1.5717f);
+    float correction = 1.0f - 0.0824f * Math::Pow(r, 1.5962f);
     int predictedFinal = int(currentCutoff * correction);
 ```
 

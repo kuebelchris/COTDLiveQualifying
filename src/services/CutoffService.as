@@ -86,7 +86,7 @@ namespace CutoffService
             if (secsRemaining >= 0 && secsRemaining <= PREDICTION_WINDOW_SECS)
             {
                 int predictedCutoff = PredictFinalCutoff(cutoff.time, secsRemaining);
-                singleResultVMs.InsertLast(VMMapper::ToSingleUserResultCutoffPredictionVM(cutoff, predictedCutoff));
+                singleResultVMs.InsertLast(VMMapper::ToSingleUserResultCutoffPredictionVM(predictedCutoff));
                 rowAdded = true;
             }
         }
