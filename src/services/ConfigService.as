@@ -6,6 +6,9 @@ class PredictionConfig {
     float a = 0.0824f;
     // Exponent in the power-law decay formula
     float b = 1.5962f;
+    // AR(1) residual correction weight (lambda).
+    // predicted = staticPred + lambda * (currentCutoff - staticPred(prev))
+    float lambda = 0.45f;
     // Maximum seconds left in qualifying at which the prediction row is shown
     int windowSecs = 300;
 }
@@ -43,6 +46,9 @@ namespace ConfigService {
         }
         if (json["window_secs"].GetType() == Json::Type::Number) {
             config.windowSecs = int(json["window_secs"]);
+        }
+        if (json["lambda"].GetType() == Json::Type::Number) {
+            config.lambda = float(json["lambda"]);
         }
         @g_predictionConfig = config;
         trace("[ConfigService] Loaded prediction config: a=" + config.a + " b=" + config.b + " windowSecs=" + config.windowSecs);

@@ -27,5 +27,6 @@ namespace PluginState
         state_settingsChanged = false;
         state_configLoaded = false;
         ConfigService::Reset();
+        CutoffService::ResetArState();
     }
 }
