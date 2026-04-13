@@ -5,43 +5,47 @@ namespace QualifyingSession
 
     void RunLoop()
     {
+        if (!state_configLoaded)
+        {
+            ConfigService::FetchAll();
+        }
+
+        LoadPlayersIfNeeded();
+        LoadMapUidIfNeeded();
+        LoadCurrentChallengeIdIfNeeded();
+
+        array<SingleUserResultVM@> singleResultVMs = FetchResults(cotdApi);
+
+        if (settings_showDivOneCutoff || settings_showCutoffPrediction)
+        {
+            CutoffService::AppendCutoffRows(singleResultVMs, cotdApi, state_currentChallengeid, state_currentMapUid, cast<CTrackMania>(GetApp()));
+        }
+
+        state_rankingModel = RankingController::BuildModel(singleResultVMs);
+        state_forceRefreshPlayers = false;
+    }
+
+    void LoadPlayersIfNeeded()
+    {
         bool settingsChanged = state_settingsChanged || state_forceRefreshPlayers;
         state_settingsChanged = false;
         if (settingsChanged)
         {
-            accountIds = {};
+            state_accountIds = {};
+            PlayerLoaderService::LoadClubAndCustomPlayers();
             @cotdApi = ResolveCotdApi();
         }
 
-        PlayerLoaderService::LoadAll(settingsChanged);
-
-        string mapid = GetCurrentMapUid();
-
-        if (state_currentChallengeid == 0)
-        {
-            state_activeCupType = ResolveCupType(mapid);
-            state_currentChallengeid = nadeoCotdApi.GetCurrentChallengeIdByType(state_activeCupType);
-        }
-
-        array<SingleUserResultVM@> singleResultVMs = BuildResultVMs(cotdApi, mapid);
-
-        if (settings_showDivOneCutoff || settings_showCutoffPrediction)
-        {
-            CutoffService::AppendCutoffRows(singleResultVMs, cotdApi, state_currentChallengeid, mapid, cast<CTrackMania>(GetApp()));
-        }
-
-        vm = VMMapper::ToUserResultVM(BuildDisplayModeList(state_currentClubName), singleResultVMs);
-        state_forceRefreshPlayers = false;
+        PlayerLoaderService::LoadFriends(settingsChanged);
     }
 
-    void Reset()
-    {
-        state_currentChallengeid = 0;
-        state_activeCupType = "cotd";
-        vm = UserResultVM();
-        accountIds = {};
-        totalPlayers = 0;
-        state_forceRefreshPlayers = true;
+    void LoadCurrentChallengeIdIfNeeded()
+    {    
+        if (state_currentChallengeid == 0)
+        {
+            state_activeCupType = ResolveCupType(state_currentMapUid);
+            state_currentChallengeid = nadeoCotdApi.GetCurrentChallengeIdByType(state_activeCupType);
+        }
     }
 
     void AwaitRefresh()
@@ -53,7 +57,7 @@ namespace QualifyingSession
         {
             if (progress != 0)
             {
-                refreshProgress = 1 - (progress / refreshTime);
+                state_refreshProgress = 1 - (progress / refreshTime);
             }
             progress = progress + progressBarInterval;
             sleep(progressBarInterval);
@@ -65,7 +69,7 @@ namespace QualifyingSession
         NadeoCotdApi nadeo;
         @nadeoCotdApi = nadeo;
 
-        if (settings_cotdApi == CotdApi::Nadeo)
+        if (settings_cotdApi == CotdApiType::Nadeo)
         {
             return nadeoCotdApi;
         }
@@ -73,15 +77,18 @@ namespace QualifyingSession
         return mapMonitor;
     }
 
-    string GetCurrentMapUid()
+    void LoadMapUidIfNeeded()
     {
-        auto network = cast<CTrackManiaNetwork>(cast<CTrackMania>(GetApp()).Network);
-        return network.ClientManiaAppPlayground.Playground.Map.MapInfo.MapUid;
+        if (state_currentMapUid.Length == 0)
+        {
+            auto network = cast<CTrackManiaNetwork>(cast<CTrackMania>(GetApp()).Network);
+            state_currentMapUid = network.ClientManiaAppPlayground.Playground.Map.MapInfo.MapUid;
+        }
     }
 
-    array<SingleUserResultVM@> BuildResultVMs(ICotdApi@ cotdApi, const string &in mapid)
+    array<SingleUserResultVM@> FetchResults(ICotdApi@ cotdApi)
     {
-        array<Result@> allResults = cotdApi.GetCurrentStandingForPlayers(accountIds, state_currentChallengeid, mapid);
+        array<Result@> allResults = cotdApi.GetCurrentStandingForPlayers(state_accountIds, state_currentChallengeid, state_currentMapUid);
         allResults.SortAsc();
 
         array<Result@> topResults = {};
@@ -116,11 +123,11 @@ namespace QualifyingSession
 
     uint GetMaxTrackedPlayers()
     {
-        if (settings_cotdApi == CotdApi::Nadeo)
+        if (settings_cotdApi == CotdApiType::Nadeo)
         {
             return 100;
         }
-        if (settings_cotdApi == CotdApi::MapMonitor)
+        if (settings_cotdApi == CotdApiType::MapMonitor)
         {
             return 1000;
         }

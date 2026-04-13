@@ -4,10 +4,6 @@ namespace CutoffService
     // Used to normalise the time-remaining value in the prediction formula.
     const float QUALIFYING_DURATION_SECS = 840.0f;
 
-    // Maximum seconds remaining at which the prediction is shown.
-    // Predictions beyond 5 minutes have high uncertainty (>500 ms MAE).
-    const int PREDICTION_WINDOW_SECS = 300;
-
     // Returns the number of seconds remaining in the current qualifier,
     // derived from the game's own RulesStateEndTime / GameTime fields.
     // Returns -1 when the playground or arena state is not available.
@@ -47,7 +43,7 @@ namespace CutoffService
             return currentCutoffMs;
         }
         float r = float(secsRemaining) / QUALIFYING_DURATION_SECS;
-        float correction = 1.0f - 0.0824f * Math::Pow(r, 1.5962f);
+        float correction = 1.0f - ConfigService::g_predictionConfig.a * Math::Pow(r, ConfigService::g_predictionConfig.b);
         if (correction < 0.5f)
         {
             correction = 0.5f;
@@ -83,7 +79,7 @@ namespace CutoffService
         if (settings_showCutoffPrediction)
         {
             int secsRemaining = GetSecondsRemaining(app);
-            if (secsRemaining >= 0 && secsRemaining <= PREDICTION_WINDOW_SECS)
+            if (secsRemaining >= 0 && secsRemaining <= ConfigService::g_predictionConfig.windowSecs)
             {
                 int predictedCutoff = PredictFinalCutoff(cutoff.time, secsRemaining);
                 singleResultVMs.InsertLast(VMMapper::ToSingleUserResultCutoffPredictionVM(predictedCutoff));

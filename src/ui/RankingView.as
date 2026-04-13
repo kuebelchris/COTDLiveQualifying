@@ -1,6 +1,6 @@
-namespace COTDClubLiveUI
+namespace RankingView
 {
-	void renderUI(const UserResultVM@ &in vm, const float &in refreshBarProgress)
+	void renderUI(const RankingModel@ &in model)
 	{
 		int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
 
@@ -22,10 +22,10 @@ namespace COTDClubLiveUI
         UI::Text("COTD Live Qualifying");
         UI::TableNextRow();
         UI::TableNextColumn();
-        UI::Text("Cup info: \\$aaa" + totalPlayers + " players (" + Math::Ceil(totalPlayers/64.0) + " divs)\\$z");
+        UI::Text("Cup info: \\$aaa" + model.totalPlayers + " players (" + Math::Ceil(model.totalPlayers/64.0) + " divs)\\$z");
         UI::TableNextRow();
         UI::TableNextColumn();
-        UI::Text(getDisplayModeDescription(vm.selectedModes));
+        UI::Text(model.selectedModesDescription);
         UI::EndTable();
 
         UI::BeginTable("ranking", 4, UI::TableFlags::SizingFixedFit);
@@ -40,8 +40,8 @@ namespace COTDClubLiveUI
         UI::TableNextColumn();
         UI::Text("Time");
 
-        for(uint i = 0; i < vm.userResults.Length; i++) {
-            SingleUserResultVM@ result = vm.userResults[i];
+        for(uint i = 0; i < model.userResults.Length; i++) {
+            SingleUserResultVM@ result = model.userResults[i];
             UI::TableNextRow();
             UI::TableNextColumn();
             UI::Text(result.RankString());
@@ -57,7 +57,7 @@ namespace COTDClubLiveUI
 
         if (settings_showProgressBar)
         {
-            UI::ProgressBar(refreshBarProgress, vec2(-1,1));
+            UI::ProgressBar(state_refreshProgress, vec2(-1,1));
         }
     
         
@@ -65,20 +65,4 @@ namespace COTDClubLiveUI
         
         UI::End();
 	}
-
-    string getDisplayModeDescription(array<string> selectedModes)
-    {
-        string displayMode = "List: ";
-        for(uint i = 0; i < selectedModes.Length; i++) {
-            if (i == selectedModes.Length - 1)
-            {
-                displayMode = displayMode + selectedModes[i] + "$z";
-            }
-            else
-            {
-                displayMode = displayMode + selectedModes[i] + "$z + ";
-            }
-        }
-        return Text::OpenplanetFormatCodes(displayMode);
-    }
 }

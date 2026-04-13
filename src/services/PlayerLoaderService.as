@@ -2,19 +2,14 @@ namespace PlayerLoaderService
 {
     int friendsRefreshIndicator = 4;
 
-    void LoadAll(bool settingsChanged)
+    void LoadClubAndCustomPlayers()
     {
-        if (settings_showClub && settingsChanged)
+        if (settings_showClub)
         {
             LoadClub();
         }
 
-        if (settings_showFriends)
-        {
-            LoadFriends(settingsChanged);
-        }
-
-        if (settings_showCustomPlayers && settingsChanged && settings_customPlayers.Length >= 36)
+        if (settings_showCustomPlayers && settings_customPlayers.Length >= 36)
         {
             LoadCustomPlayers();
         }
@@ -47,16 +42,15 @@ namespace PlayerLoaderService
 
     void LoadCustomPlayers()
     {
-        state_customPlayerListArray = settings_customPlayers.Split("\n");
-        AddAccountIds(state_customPlayerListArray);
+        AddAccountIds(settings_customPlayers.Split("\n"));
     }
 
     void AddSelf()
     {
         string currentUserId = NadeoCoreAPI::getCurrentWebServicesUserId();
-        if (accountIds.Find(currentUserId) < 0)
+        if (state_accountIds.Find(currentUserId) < 0)
         {
-            accountIds.InsertLast(currentUserId);
+            state_accountIds.InsertLast(currentUserId);
         }
     }
 
@@ -65,9 +59,9 @@ namespace PlayerLoaderService
         uint maxPlayers = QualifyingSession::GetMaxTrackedPlayers();
         for (uint p = 0; p < fetchedPlayers.Length; p++)
         {
-            if (accountIds.Find(fetchedPlayers[p]) < 0 && accountIds.Length < maxPlayers)
+            if (state_accountIds.Find(fetchedPlayers[p]) < 0 && state_accountIds.Length < maxPlayers)
             {
-                accountIds.InsertLast(fetchedPlayers[p]);
+                state_accountIds.InsertLast(fetchedPlayers[p]);
             }
         }
     }

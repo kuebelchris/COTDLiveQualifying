@@ -41,4 +41,4 @@ int settings_clubId = 0;
 string settings_customPlayers = "";
 
 [Setting category="API" name="Select which API to use"]
-CotdApi settings_cotdApi = CotdApi::Nadeo;
+CotdApiType settings_cotdApi = CotdApiType::Nadeo;

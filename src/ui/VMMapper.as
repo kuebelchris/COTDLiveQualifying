@@ -1,11 +1,5 @@
 namespace VMMapper 
 {
-
-	UserResultVM@ ToUserResultVM(const array<string> &in clubName, const array<SingleUserResultVM@> &in results)
-	{
-		return UserResultVM(clubName, results);
-	}
-
 	array<SingleUserResultVM@> ToSingleUserResultVMs(const array<Result@> &in results)
 	{
 		array<SingleUserResultVM@> resultVMs = {};

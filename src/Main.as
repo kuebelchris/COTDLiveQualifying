@@ -1,9 +1,3 @@
-// Global variables
-int totalPlayers = 0;
-array<string> accountIds;
-UserResultVM vm = UserResultVM();
-float refreshProgress = 0;
-
 void Render()
 {
 #if TMNEXT
@@ -20,7 +14,7 @@ void Render()
             return;
         }
 
-        COTDClubLiveUI::renderUI(vm, refreshProgress);
+        RankingController::Render();
     }
 #endif
 }
@@ -28,7 +22,7 @@ void Render()
 void RenderMenu()
 {
 #if TMNEXT
-    if(UI::MenuItem("\\$f0c\\$s" + Icons::Bold + "\\$z COTD Live Qualifying", "", windowVisible)) {
+    if(UI::MenuItem("\\$f0c\\$s" + Icons::Trophy + "\\$z COTD Live Qualifying", "", windowVisible)) {
         windowVisible = !windowVisible;
     }
 #endif
@@ -52,7 +46,7 @@ void Main()
         }
         else
         {
-            QualifyingSession::Reset();
+            PluginState::Reset();
         }
 
         QualifyingSession::AwaitRefresh();
