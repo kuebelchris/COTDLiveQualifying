@@ -60,6 +60,11 @@ void Main()
 #endif
 }
 
+void OnSettingsChanged()
+{
+    state_settingsChanged = true;
+}
+
 // COTD, COTW, and Grand Enduro all use the same qualifier game mode script.
 bool hasPermissionAndIsQualifyingRunning()
 {

@@ -5,7 +5,8 @@ namespace QualifyingSession
 
     void RunLoop()
     {
-        bool settingsChanged = checkSettingsChanged();
+        bool settingsChanged = state_settingsChanged || state_forceRefreshPlayers;
+        state_settingsChanged = false;
         if (settingsChanged)
         {
             accountIds = {};
@@ -29,7 +30,6 @@ namespace QualifyingSession
             CutoffService::AppendCutoffRows(singleResultVMs, cotdApi, state_currentChallengeid, mapid, cast<CTrackMania>(GetApp()));
         }
 
-        SyncDisplayState();
         vm = VMMapper::ToUserResultVM(BuildDisplayModeList(state_currentClubName), singleResultVMs);
         state_forceRefreshPlayers = false;
     }
@@ -91,18 +91,6 @@ namespace QualifyingSession
         }
 
         return VMMapper::ToSingleUserResultVMs(topResults);
-    }
-
-    void SyncDisplayState()
-    {
-        state_showClub = settings_showClub;
-        state_currentClubId = settings_clubId;
-        state_showFriends = settings_showFriends;
-        state_showCustom = settings_showCustomPlayers;
-        state_customPlayerList = settings_customPlayers;
-        state_showDivOneCutoff = settings_showDivOneCutoff;
-        state_showCutoffPrediction = settings_showCutoffPrediction;
-        state_cotdApi = settings_cotdApi;
     }
 
     // Detects which cup type the current map belongs to by comparing the map UID

@@ -48,13 +48,19 @@ class SingleUserResultVM
         return "\\$3F0" + Text::Format("%d", this.rank);
     }
 
-    /* Sort by rank. Cutoff and prediction rows use a artificial high rank so they always
-        appear below real player rows on a tie. */
+    /* Sort by time ascending. On a tie, regular player rows appear before cutoff rows,
+        and cutoff rows appear before prediction rows. */
     int opCmp(SingleUserResultVM@ other) {
-        int myRank    = this.isPrediction ? 0x7FFFFFFF : (this.isCutoff ? 0x7FFFFFFE : this.rank);
-        int otherRank = other.isPrediction ? 0x7FFFFFFF : (other.isCutoff ? 0x7FFFFFFE : other.rank);
-        int rankDiff = myRank - otherRank;
-        return (rankDiff == 0) ? 0 : ((rankDiff > 0) ? 1 : -1);
+        int timeDiff = this.time - other.time;
+        if (timeDiff != 0) 
+        {
+            return (timeDiff > 0) ? 1 : -1;
+        }
+        // Tie-break: regular player (0) < cutoff (1) < prediction (2)
+        int myTie = this.isPrediction ? 2 : (this.isCutoff ? 1 : 0);
+        int otherTie = other.isPrediction ? 2 : (other.isCutoff ? 1 : 0);
+        int tieDiff = myTie - otherTie;
+        return (tieDiff == 0) ? 0 : ((tieDiff > 0) ? 1 : -1);
     }
 
 }
