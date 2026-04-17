@@ -36,6 +36,14 @@ class SingleUserResultVM
         return this.playerDisplayName;
     }
 
+    bool IsCutoff() {
+        return this.isCutoff;
+    }
+
+    int Time() {
+        return this.time;
+    }
+
     string RankString() {
         if (this.isPrediction)
         {

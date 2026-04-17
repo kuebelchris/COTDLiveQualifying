@@ -55,14 +55,50 @@ namespace RankingView
 
         UI::EndTable();
 
+        // Auto-show chart when qualifying ends if setting is enabled
+        if (model.secsRemaining == 0 && settings_showChartAfterQuali)
+        {
+            settings_showChart = true;
+        }
+
+        // Button to toggle chart visibility (only show if recording is enabled)
+        if (settings_recordProgress)
+        {
+            string buttonLabel = settings_showChart ? "Hide Progress Chart" : "Display Progress Chart";
+            if (UI::Button(buttonLabel, vec2(0, 0)))
+            {
+                settings_showChart = !settings_showChart;
+            }
+        }
+
         if (settings_showProgressBar)
         {
             UI::ProgressBar(state_refreshProgress, vec2(-1,1));
         }
+
+        // Render the time evolution chart (if enabled)
+        if (settings_showChart && settings_recordProgress)
+        {
+            int div1CutoffTimeMs = ExtractDiv1CutoffTime(model);
+            ChartView::RenderTimeEvolutionChart(div1CutoffTimeMs);
+        }
     
-        
         UI::EndGroup();
         
         UI::End();
+	}
+
+	int ExtractDiv1CutoffTime(const RankingModel@ &in model)
+	{
+		// Find the cutoff row in the results
+		for (uint i = 0; i < model.userResults.Length; i++)
+		{
+			SingleUserResultVM@ result = model.userResults[i];
+			if (result.IsCutoff())
+			{
+				return result.Time();
+			}
+		}
+		return -1; // No cutoff found
 	}
 }

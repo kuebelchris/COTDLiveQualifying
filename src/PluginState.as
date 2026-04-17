@@ -28,5 +28,6 @@ namespace PluginState
         state_configLoaded = false;
         ConfigService::Reset();
         CutoffService::ResetArState();
+        TimeSeriesService::Reset();
     }
 }

@@ -8,12 +8,13 @@ namespace RankingController
         RankingView::renderUI(state_rankingModel);
     }
 
-    RankingModel@ BuildModel(const array<SingleUserResultVM@> &in userResults)
+    RankingModel@ BuildModel(const array<SingleUserResultVM@> &in userResults, int secsRemaining = 900)
     {
         return RankingModel(
             userResults,
             BuildSelectedModesDescription(),
-            state_totalPlayers
+            state_totalPlayers,
+            secsRemaining
         );
     }
 

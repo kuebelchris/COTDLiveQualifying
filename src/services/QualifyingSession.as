@@ -21,7 +21,8 @@ namespace QualifyingSession
             CutoffService::AppendCutoffRows(singleResultVMs, cotdApi, state_currentChallengeid, state_currentMapUid, cast<CTrackMania>(GetApp()));
         }
 
-        state_rankingModel = RankingController::BuildModel(singleResultVMs);
+        int secsRemaining = CutoffService::GetSecondsRemaining(cast<CTrackMania>(GetApp()));
+        state_rankingModel = RankingController::BuildModel(singleResultVMs, secsRemaining);
         state_forceRefreshPlayers = false;
     }
 
@@ -89,6 +90,10 @@ namespace QualifyingSession
     array<SingleUserResultVM@> FetchResults(ICotdApi@ cotdApi)
     {
         array<Result@> allResults = cotdApi.GetCurrentStandingForPlayers(state_accountIds, state_currentChallengeid, state_currentMapUid);
+        
+        // Capture time series snapshot BEFORE sorting
+        CaptureTimeSnapshotFromResults(allResults);
+        
         allResults.SortAsc();
 
         array<Result@> topResults = {};
@@ -157,4 +162,41 @@ namespace QualifyingSession
 
         return displayModeNames;
     }
+
+    void CaptureTimeSnapshotFromResults(const array<Result@> &in allResults)
+    {
+        // Get seconds remaining in the qualifying session
+        int secsRemaining = CutoffService::GetSecondsRemaining(cast<CTrackMania>(GetApp()));
+        
+        // Only record snapshots if data recording is enabled
+        if (!settings_recordProgress)
+        {
+            return;
+        }
+        
+        // Initialize time series for any new players on first capture
+        for (uint i = 0; i < allResults.Length; i++)
+        {
+            Result@ r = allResults[i];
+            PlayerTimeSeries@ ts = TimeSeriesService::GetPlayerTimeSeries(r.accountId);
+            if (ts is null)
+            {
+                // Try to get the display name - it will be resolved eventually by VMMapper
+                string displayName = "Player";
+                @ts = PlayerTimeSeries(r.accountId, displayName);
+                TimeSeriesService::InitializePlayer(r.accountId, displayName);
+            }
+        }
+        
+        // Record a snapshot for each tracked player
+        TimeSeriesService::RecordSnapshot(allResults, secsRemaining);
+        
+        // Record the current cutoff progression
+        int currentCutoff = TimeSeriesService::GetDiv1CutoffTime();
+        if (currentCutoff > 0)
+        {
+            TimeSeriesService::RecordCutoffSnapshot(currentCutoff, secsRemaining);
+        }
+    }
 }
+

@@ -34,6 +34,15 @@ bool settings_showCutoffPrediction = false;
 [Setting category="Display Settings" name="Show refresh progress bar"]
 bool settings_showProgressBar = true;
 
+[Setting category="Display Settings" name="Record Progress" description="Record player time progression throughout qualifying"]
+bool settings_recordProgress = true;
+
+[Setting category="Display Settings" name="Show progression chart after qualifying ends" description="Automatically show the chart when qualifying ends"]
+bool settings_showChartAfterQuali = true;
+
+[Setting hidden]
+bool settings_showChart = false;
+
 [Setting hidden]
 int settings_clubId = 0;
 
