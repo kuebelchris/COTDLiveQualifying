@@ -1,17 +1,55 @@
 class NadeoCotdApi : ICotdApi
 {
-    
-	int GetCurrentCOTDChallengeId()
+	// Returns the qualifier challenge ID for the current cup.
+	// type: "cotd" | "cotw" | "grand_race"
+	// Finds the first crossplay entry where now is between (startDate - 2 min) and endDate.
+	// Returns 0 if qualifying has not started yet or has already ended.
+	int GetCurrentChallengeIdByType(const string &in type)
 	{
-	    string compUrl = NadeoServices::BaseURLMeet();
-	    auto matchstatus = FetchEndpoint(compUrl + "/api/cup-of-the-day/current");
-		if (matchstatus.GetType() == Json::Type::Null)
-	    {
-			warn("could not retreive cotd from Nadeo API");
+		string compUrl = NadeoServices::BaseURLMeet();
+		//Usually, we will get 15 entries for a whole set of daily cotds (evening, night and morning COTD for crossplay, pc, luna, xb1 and psn), so we need to at least get the 15 newest cups to find the currently active one.
+		Json::Value@ data = FetchEndpoint(compUrl + "/api/cups-of-the-day?type=" + type + "&length=20&offset=0");
+		if (data.GetType() == Json::Type::Null)
+		{
+			warn("could not retrieve cups-of-the-day for type=" + type);
 			return 0;
 		}
-	    string challengeName = matchstatus["challenge"]["name"];
-	    return matchstatus["challenge"]["id"];
+		Json::Value@ cups = data["COTDs"];
+		if (cups.GetType() != Json::Type::Array || cups.Length == 0)
+		{
+			warn("no cups found for type=" + type);
+			return 0;
+		}
+
+		int64 now = Time::Stamp;
+
+		for (uint i = 0; i < cups.Length; i++)
+		{
+			Json::Value@ cup = cups[i];
+			string partition = cup["competition"]["partition"];
+			if (partition != "crossplay")
+			{
+				continue;
+			}
+
+			int64 startDate = int64(cup["startDate"]) - 120; // 2 min early, servers open a minute before the qualifying officially starts
+			int64 endDate   = int64(cup["endDate"]);
+
+			if (now < startDate)
+			{
+				continue;
+			}
+			if (now > endDate)
+			{
+				continue;
+			}
+
+			int challengeId = cup["challenge"]["id"];
+			return challengeId;
+		}
+
+		warn("no active cup found for type=" + type + "; qualifying has not started yet or has already ended");
+		return 0;
 	}
 
 	Result@ GetDiv1CutoffTime(const int&in challengeid, const string&in mapid)
@@ -19,6 +57,7 @@ class NadeoCotdApi : ICotdApi
         string compUrl = NadeoServices::BaseURLMeet();
 		string cotdEndpoint = compUrl + "/api/challenges/" + challengeid + "/records/maps/" + mapid + "?offset=63&length=1";
 		Json::Value divOneCutoff = FetchEndpoint(cotdEndpoint);
+
 		if (divOneCutoff.GetType() == Json::Type::Null)
 	    {
 			warn("could not retrieve div 1 cutoff from Nadeo API");
@@ -53,7 +92,7 @@ class NadeoCotdApi : ICotdApi
 			return results;
 		}
 
-	    totalPlayers = currentStanding["cardinal"];
+	    state_totalPlayers = currentStanding["cardinal"];
 	    Json::Value records = currentStanding["records"];
 
         for(uint n = 0; n < records.Length; n++ )
@@ -80,7 +119,8 @@ class NadeoCotdApi : ICotdApi
 	    while(!req.Finished()) {
 	        yield();
 	    }
-	    return Json::Parse(req.String());
+	    string raw = req.String();
+	    return Json::Parse(raw);
 	}
 
     int calculateDiv(const int &in playerRank)

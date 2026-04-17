@@ -70,28 +70,66 @@ namespace NadeoLiveServicesAPI
 	    return clubMembers;
 	}
 
-	//TODO for later: feature to select a club via UI Dropdown.
-	/*array<ClubSelectItem@> GetAllCLubs()
+	array<ClubInfo@> GetAllClubs()
 	{
+		array<ClubInfo@> clubs;
 		string nadeoURL = NadeoServices::BaseURLLive();
 
-		Json::Value clubResult = FetchEndpointLiveServices(nadeoURL + "/api/token/club/mine?offset=0&length=100");
-		Json::Value clubList = clubResult["clubList"];
-
-		array<ClubSelectItem@> clubs;
-		for (uint n = 0; n < clubList.Length; n++)
-		{
-			int clubId = clubList[n]["id"];
-			string name = clubList[n]["name"];
-
-			Json::Value memberInfo = FetchEndpointLiveServices(nadeoURL + "/api/token/club/" + Text::Format("%d", clubId) + "/member?offset=0&length=1");
-			int memberCount = memberInfo["itemCount"];
-
-			clubs.InsertLast(ClubSelectItem(name, clubId, memberCount));
+		Json::Value@ clubResult = FetchEndpointLiveServices(nadeoURL + "/api/token/club/mine?offset=0&length=100");
+		if (clubResult.GetType() == Json::Type::Null) {
+			return clubs;
 		}
 
-	    return clubs;
-	}*/
+		Json::Value@ clubList = clubResult["clubList"];
+		for (uint n = 0; n < clubList.Length; n++) {
+			int clubId = clubList[n]["id"];
+			string name = clubList[n]["name"];
+			string tag = clubList[n]["tag"];
+			clubs.InsertLast(ClubInfo(clubId, name, tag));
+		}
+
+		return clubs;
+	}
+
+	// Returns the map UID for the current Cup of the Week map.
+	// Endpoint: GET /api/campaign/cup-of-the-week?length=1
+	string GetCotwMapUid()
+	{
+		string nadeoURL = NadeoServices::BaseURLLive();
+		Json::Value@ data = FetchEndpointLiveServices(nadeoURL + "/api/campaign/cup-of-the-week?length=1&offset=0");
+		if (data.GetType() == Json::Type::Null) { 
+			return ""; 
+		}
+		Json::Value@ list = data["campaignList"];
+		if (list.GetType() != Json::Type::Array || list.Length == 0) { 
+			return ""; 
+		}
+		Json::Value@ playlist = list[0]["playlist"];
+		if (playlist.GetType() != Json::Type::Array || playlist.Length == 0) { 
+			return ""; 
+		}
+		return playlist[0]["mapUid"];
+	}
+
+	// Returns the map UID for the current Grand Enduro map.
+	// Endpoint: GET /api/campaign/weekly-grands?length=1
+	string GetGrandEnduroMapUid()
+	{
+		string nadeoURL = NadeoServices::BaseURLLive();
+		Json::Value@ data = FetchEndpointLiveServices(nadeoURL + "/api/campaign/weekly-grands?length=1&offset=0");
+		if (data.GetType() == Json::Type::Null) { 
+			return ""; 
+		}
+		Json::Value@ list = data["campaignList"];
+		if (list.GetType() != Json::Type::Array || list.Length == 0) { 
+			return ""; 
+		}
+		Json::Value@ playlist = list[0]["playlist"];
+		if (playlist.GetType() != Json::Type::Array || playlist.Length == 0) { 
+			return ""; 
+		}
+		return playlist[0]["mapUid"];
+	}
 
 	Json::Value@ FetchEndpointLiveServices(const string &in route) {
 	    auto req = NadeoServices::Get("NadeoLiveServices", route);

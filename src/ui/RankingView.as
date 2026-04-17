@@ -1,6 +1,6 @@
-namespace COTDClubLiveUI
+namespace RankingView
 {
-	void renderUI(const UserResultVM@ &in vm, const float &in refreshBarProgress)
+	void renderUI(const RankingModel@ &in model)
 	{
 		int windowFlags = UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoCollapse | UI::WindowFlags::AlwaysAutoResize | UI::WindowFlags::NoDocking;
 
@@ -22,10 +22,10 @@ namespace COTDClubLiveUI
         UI::Text("COTD Live Qualifying");
         UI::TableNextRow();
         UI::TableNextColumn();
-        UI::Text("Cup info: \\$aaa" + totalPlayers + " players (" + Math::Ceil(totalPlayers/64.0) + " divs)\\$z");
+        UI::Text("Cup info: \\$aaa" + model.totalPlayers + " players (" + Math::Ceil(model.totalPlayers/64.0) + " divs)\\$z");
         UI::TableNextRow();
         UI::TableNextColumn();
-        UI::Text(getDisplayModeDescription(vm.selectedModes));
+        UI::Text(model.selectedModesDescription);
         UI::EndTable();
 
         UI::BeginTable("ranking", 4, UI::TableFlags::SizingFixedFit);
@@ -40,8 +40,8 @@ namespace COTDClubLiveUI
         UI::TableNextColumn();
         UI::Text("Time");
 
-        for(uint i = 0; i < vm.userResults.Length; i++) {
-            SingleUserResultVM@ result = vm.userResults[i];
+        for(uint i = 0; i < model.userResults.Length; i++) {
+            SingleUserResultVM@ result = model.userResults[i];
             UI::TableNextRow();
             UI::TableNextColumn();
             UI::Text(result.RankString());
@@ -55,30 +55,50 @@ namespace COTDClubLiveUI
 
         UI::EndTable();
 
+        // Auto-show chart when qualifying ends if setting is enabled
+        if (model.secsRemaining == 0 && settings_showChartAfterQuali)
+        {
+            settings_showChart = true;
+        }
+
+        // Button to toggle chart visibility (only show if recording is enabled)
+        if (settings_recordProgress)
+        {
+            string buttonLabel = settings_showChart ? "Hide Progress Chart" : "Display Progress Chart";
+            if (UI::Button(buttonLabel, vec2(0, 0)))
+            {
+                settings_showChart = !settings_showChart;
+            }
+        }
+
         if (settings_showProgressBar)
         {
-            UI::ProgressBar(refreshBarProgress, vec2(-1,1));
+            UI::ProgressBar(state_refreshProgress, vec2(-1,1));
+        }
+
+        // Render the time evolution chart (if enabled)
+        if (settings_showChart && settings_recordProgress)
+        {
+            int div1CutoffTimeMs = ExtractDiv1CutoffTime(model);
+            ChartView::RenderTimeEvolutionChart(div1CutoffTimeMs);
         }
     
-        
         UI::EndGroup();
         
         UI::End();
 	}
 
-    string getDisplayModeDescription(array<string> selectedModes)
-    {
-        string displayMode = "List: ";
-        for(uint i = 0; i < selectedModes.Length; i++) {
-            if (i == selectedModes.Length - 1)
-            {
-                displayMode = displayMode + selectedModes[i] + "$z";
-            }
-            else
-            {
-                displayMode = displayMode + selectedModes[i] + "$z + ";
-            }
-        }
-        return ColoredString(displayMode);
-    }
+	int ExtractDiv1CutoffTime(const RankingModel@ &in model)
+	{
+		// Find the cutoff row in the results
+		for (uint i = 0; i < model.userResults.Length; i++)
+		{
+			SingleUserResultVM@ result = model.userResults[i];
+			if (result.IsCutoff())
+			{
+				return result.Time();
+			}
+		}
+		return -1; // No cutoff found
+	}
 }

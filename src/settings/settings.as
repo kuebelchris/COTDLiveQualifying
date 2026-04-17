@@ -1,17 +1,3 @@
-[SettingsTab name="Info"]
-void RenderSettingsAbout() {
-    UI::Text("Limitations:");
-    UI::Text("Clubs are supported up to 100 players (1000 when using MapMonitor), otherwise not all results of the players can be tracked.");
-    UI::Text("Same applies to Uplay friends.");
-    UI::Separator();
-    UI::Text("Tips:");
-    UI::Text("You can get the club id by searching for the club at trackmania.io.");
-    UI::Text("The Account ID of a player can be found on a trackmania.io player profile and looks like this: a1a2a3a4-b1b2-c1c2-d1d1-e1e2e3e4e5e6");
-    UI::Separator();
-    UI::Text("Contributors:");
-    UI::Text("Thanks to JanVan8ern, XertroV and huhen for contributing with new features and improvements.");
-}
-
 [Setting category="Display Settings" name="Window visible" description="To move the table, click and drag while the Openplanet overlay is visible"]
 bool windowVisible = true;
 
@@ -42,14 +28,26 @@ bool setttings_showClubTag = true;
 [Setting category="Display Settings" name="Show division 1 cutoff"]
 bool settings_showDivOneCutoff = false;
 
+[Setting category="Display Settings" name="Show division 1 cutoff prediction" description="Predicts where the Div 1 cutoff time will end up at the end of qualifying, based on how fast it is still improving. Only shown during the last 5 minutes of qualifying, when the prediction is most accurate."]  
+bool settings_showCutoffPrediction = false;
+
 [Setting category="Display Settings" name="Show refresh progress bar"]
 bool settings_showProgressBar = true;
 
-[Setting category="Club" name="Club id of the club" description="All players from the club will be tracked"]
+[Setting category="Display Settings" name="Record Progress" description="Record player time progression throughout qualifying"]
+bool settings_recordProgress = true;
+
+[Setting category="Display Settings" name="Show progression chart after qualifying ends" description="Automatically show the chart when qualifying ends"]
+bool settings_showChartAfterQuali = true;
+
+[Setting hidden]
+bool settings_showChart = false;
+
+[Setting hidden]
 int settings_clubId = 0;
 
-[Setting category="Custom Players" multiline name="Custom list of players to show" description="Enter a list of account-ids, each in a new line e.g.: a1a2a3a4-b1b2-c1c2-d1d1-e1e2e3e4e5e6"]
+[Setting hidden]
 string settings_customPlayers = "";
 
 [Setting category="API" name="Select which API to use"]
-CotdApi settings_cotdApi = CotdApi::Nadeo;
+CotdApiType settings_cotdApi = CotdApiType::Nadeo;

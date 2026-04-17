@@ -41,7 +41,7 @@ class MapMonitorCotdApi : ICotdApi
 			return results;
 		}
 
-	    totalPlayers = currentStanding["cardinal"];
+	    state_totalPlayers = currentStanding["cardinal"];
 	    Json::Value@ records = currentStanding["records"];
 
 	    
